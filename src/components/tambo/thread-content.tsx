@@ -55,8 +55,7 @@ const useThreadContentContext = () => {
  * Props for the ThreadContent component.
  * Extends standard HTMLDivElement attributes.
  */
-export interface ThreadContentProps
-  extends React.HTMLAttributes<HTMLDivElement> {
+export interface ThreadContentProps extends React.HTMLAttributes<HTMLDivElement> {
   /** Optional styling variant for the message container */
   variant?: VariantProps<typeof messageVariants>["variant"];
   /** The child elements to render within the container. */
@@ -135,7 +134,7 @@ const ThreadContentMessages = React.forwardRef<
   return (
     <div
       ref={ref}
-      className={cn("flex flex-col gap-2", className)}
+      className={cn("flex flex-col gap-4", className)}
       data-slot="thread-content-messages"
       {...props}
     >
@@ -161,7 +160,7 @@ const ThreadContentMessages = React.forwardRef<
               <div
                 className={cn(
                   "flex flex-col",
-                  message.role === "assistant" ? "w-full" : "max-w-3xl",
+                  message.role === "assistant" ? "w-full" : "max-w-[85%]",
                 )}
               >
                 <ReasoningInfo />
@@ -169,8 +168,8 @@ const ThreadContentMessages = React.forwardRef<
                 <MessageContent
                   className={
                     message.role === "assistant"
-                      ? "text-foreground font-sans"
-                      : "text-foreground bg-container hover:bg-backdrop font-sans"
+                      ? "text-foreground"
+                      : "text-foreground bg-muted/50 rounded-xl"
                   }
                 />
                 <ToolcallInfo />

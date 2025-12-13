@@ -1,7 +1,7 @@
 "use client";
 
 import { z } from "zod";
-import { BillingItemSchema, BillingCategoryEnum } from "@/lib/hotel-types";
+import { BillingItemSchema } from "@/lib/hotel-types";
 import { useHotel } from "@/lib/hotel-store";
 import {
   Receipt,
@@ -16,8 +16,14 @@ import {
 // Schema for Tambo component registration
 export const BillingStatementPropsSchema = z.object({
   reservationId: z.string().describe("Reservation ID to show billing for"),
-  items: z.array(BillingItemSchema).optional().describe("Billing items (if not provided, fetched from state)"),
-  showStagedChanges: z.boolean().optional().describe("Show staged billing changes"),
+  items: z
+    .array(BillingItemSchema)
+    .optional()
+    .describe("Billing items (if not provided, fetched from state)"),
+  showStagedChanges: z
+    .boolean()
+    .optional()
+    .describe("Show staged billing changes"),
   compact: z.boolean().optional().describe("Compact mode for chat embedding"),
 });
 
@@ -32,11 +38,11 @@ const categoryIcons = {
 };
 
 const categoryColors = {
-  room: "text-blue-400",
-  food: "text-amber-400",
-  amenity: "text-purple-400",
-  service: "text-emerald-400",
-  tax: "text-slate-400",
+  room: "text-info",
+  food: "text-warning",
+  amenity: "text-accent",
+  service: "text-success",
+  tax: "text-muted-foreground",
 };
 
 export function BillingStatement({
@@ -52,19 +58,27 @@ export function BillingStatement({
   // Defensive check for undefined reservationId
   if (!reservationId) {
     return (
-      <div className="bg-slate-800 rounded-lg p-4 text-slate-400">
-        No billing data available
+      <div className="flex flex-col items-center justify-center rounded-lg border border-dashed border-border bg-card/50 p-8 text-center">
+        <p className="text-sm text-muted-foreground">
+          No billing data available
+        </p>
       </div>
     );
   }
 
   // Get items from props or state
-  const items = providedItems || (getBillingForReservation ? getBillingForReservation(reservationId) : []) || [];
+  const items =
+    providedItems ||
+    (getBillingForReservation ? getBillingForReservation(reservationId) : []) ||
+    [];
 
   // Get staged changes for this reservation
-  const stagedChanges = showStagedChanges && state?.stagedBillingChanges
-    ? state.stagedBillingChanges.filter((c) => c.reservationId === reservationId)
-    : [];
+  const stagedChanges =
+    showStagedChanges && state?.stagedBillingChanges
+      ? state.stagedBillingChanges.filter(
+          (c) => c.reservationId === reservationId,
+        )
+      : [];
 
   // Calculate totals
   const subtotal = items
@@ -82,9 +96,14 @@ export function BillingStatement({
     } else if (change.type === "remove" && change.itemId) {
       const item = items.find((i) => i.id === change.itemId);
       if (item) stagedAdjustment -= item.amount;
-    } else if (change.type === "discount" && change.itemId && change.discountPercent) {
+    } else if (
+      change.type === "discount" &&
+      change.itemId &&
+      change.discountPercent
+    ) {
       const item = items.find((i) => i.id === change.itemId);
-      if (item) stagedAdjustment -= item.amount * (change.discountPercent / 100);
+      if (item)
+        stagedAdjustment -= item.amount * (change.discountPercent / 100);
     }
   }
 
@@ -92,40 +111,49 @@ export function BillingStatement({
 
   // Items marked for removal
   const removedItemIds = new Set(
-    stagedChanges.filter((c) => c.type === "remove").map((c) => c.itemId)
+    stagedChanges.filter((c) => c.type === "remove").map((c) => c.itemId),
   );
 
   // Items with discounts
   const discountedItems = new Map(
     stagedChanges
       .filter((c) => c.type === "discount")
-      .map((c) => [c.itemId, c.discountPercent])
+      .map((c) => [c.itemId, c.discountPercent]),
   );
 
   // New items to add
-  const newItems = stagedChanges.filter((c) => c.type === "add" && c.item).map((c) => c.item!);
+  const newItems = stagedChanges
+    .filter((c) => c.type === "add" && c.item)
+    .map((c) => c.item!);
 
   if (compact) {
     return (
-      <div className="bg-slate-800 rounded-lg p-3">
-        <div className="flex items-center justify-between mb-2">
-          <span className="text-sm font-medium text-white flex items-center gap-2">
-            <Receipt className="w-4 h-4 text-slate-400" />
+      <div className="rounded-lg border border-border bg-card p-3">
+        <div className="mb-2 flex items-center justify-between">
+          <span className="flex items-center gap-2 text-sm font-medium text-foreground">
+            <Receipt className="h-4 w-4 text-muted-foreground" />
             Billing Statement
           </span>
-          <span className="text-lg font-bold text-white">${total.toFixed(2)}</span>
+          <span className="text-base font-semibold text-foreground">
+            ${total.toFixed(2)}
+          </span>
         </div>
-        <div className="text-xs text-slate-400">
+        <div className="text-xs text-muted-foreground">
           {items.length} items • Subtotal: ${subtotal.toFixed(2)}
           {stagedAdjustment !== 0 && (
-            <span className={stagedAdjustment < 0 ? "text-emerald-400" : "text-amber-400"}>
-              {" "}• Adjustment: {stagedAdjustment < 0 ? "-" : "+"}${Math.abs(stagedAdjustment).toFixed(2)}
+            <span
+              className={stagedAdjustment < 0 ? "text-success" : "text-warning"}
+            >
+              {" "}
+              • Adjustment: {stagedAdjustment < 0 ? "-" : "+"}$
+              {Math.abs(stagedAdjustment).toFixed(2)}
             </span>
           )}
         </div>
         {stagedChanges.length > 0 && (
-          <div className="mt-2 text-xs text-amber-400">
-            {stagedChanges.length} pending change{stagedChanges.length !== 1 ? "s" : ""}
+          <div className="mt-2 text-xs text-warning">
+            {stagedChanges.length} pending change
+            {stagedChanges.length !== 1 ? "s" : ""}
           </div>
         )}
       </div>
@@ -133,17 +161,17 @@ export function BillingStatement({
   }
 
   return (
-    <div className="bg-slate-800 rounded-lg overflow-hidden">
+    <div className="overflow-hidden rounded-lg border border-border bg-card">
       {/* Header */}
-      <div className="p-4 border-b border-slate-700">
-        <h3 className="text-lg font-semibold text-white flex items-center gap-2">
-          <Receipt className="w-5 h-5 text-slate-400" />
+      <div className="border-b border-border px-4 py-3">
+        <h3 className="flex items-center gap-2 text-sm font-medium text-foreground">
+          <Receipt className="h-4 w-4 text-muted-foreground" />
           Billing Statement
         </h3>
       </div>
 
       {/* Items */}
-      <div className="divide-y divide-slate-700/50">
+      <div>
         {items.map((item) => {
           const Icon = categoryIcons[item.category];
           const isRemoved = removedItemIds.has(item.id);
@@ -152,49 +180,55 @@ export function BillingStatement({
           return (
             <div
               key={item.id}
-              className={`p-3 flex items-center justify-between ${
-                isRemoved ? "opacity-50 bg-red-500/10" : ""
+              className={`flex items-center justify-between border-b border-border px-4 py-2.5 last:border-0 ${
+                isRemoved ? "bg-destructive/5 opacity-50" : ""
               }`}
             >
-              <div className="flex items-center gap-3">
-                <Icon className={`w-4 h-4 ${categoryColors[item.category]}`} />
+              <div className="flex items-center gap-2.5">
+                <Icon className={`h-4 w-4 ${categoryColors[item.category]}`} />
                 <div>
-                  <p className={`text-sm text-white ${isRemoved ? "line-through" : ""}`}>
+                  <p
+                    className={`text-sm text-foreground ${isRemoved ? "line-through" : ""}`}
+                  >
                     {item.description}
                   </p>
-                  <p className="text-xs text-slate-500">
+                  <p className="text-[11px] text-muted-foreground">
                     {new Date(item.date).toLocaleDateString()}
                   </p>
                 </div>
               </div>
               <div className="text-right">
                 {item.isComped ? (
-                  <span className="text-emerald-400 flex items-center gap-1">
-                    <Gift className="w-3 h-3" />
+                  <span className="flex items-center gap-1 text-xs text-success">
+                    <Gift className="h-3 w-3" />
                     Comped
                   </span>
                 ) : isRemoved ? (
                   <div>
-                    <span className="text-sm text-slate-400 line-through">
+                    <span className="text-sm text-muted-foreground line-through">
                       ${item.amount.toFixed(2)}
                     </span>
-                    <span className="text-xs text-red-400 ml-2 flex items-center gap-1">
-                      <Trash2 className="w-3 h-3" />
+                    <span className="ml-2 flex items-center gap-1 text-xs text-destructive">
+                      <Trash2 className="h-3 w-3" />
                       Removed
                     </span>
                   </div>
                 ) : discount ? (
                   <div>
-                    <span className="text-sm text-slate-400 line-through">
+                    <span className="text-sm text-muted-foreground line-through">
                       ${item.amount.toFixed(2)}
                     </span>
-                    <span className="text-sm text-emerald-400 ml-2">
+                    <span className="ml-2 text-sm text-success">
                       ${(item.amount * (1 - discount / 100)).toFixed(2)}
                     </span>
-                    <span className="text-xs text-emerald-400 block">-{discount}%</span>
+                    <span className="block text-xs text-success">
+                      -{discount}%
+                    </span>
                   </div>
                 ) : (
-                  <span className="text-sm text-white">${item.amount.toFixed(2)}</span>
+                  <span className="text-sm text-foreground">
+                    ${item.amount.toFixed(2)}
+                  </span>
                 )}
               </div>
             </div>
@@ -207,51 +241,59 @@ export function BillingStatement({
           return (
             <div
               key={`new-${i}`}
-              className="p-3 flex items-center justify-between bg-emerald-500/10"
+              className="flex items-center justify-between border-b border-border bg-success/5 px-4 py-2.5 last:border-0"
             >
-              <div className="flex items-center gap-3">
-                <Icon className={`w-4 h-4 ${categoryColors[item.category]}`} />
+              <div className="flex items-center gap-2.5">
+                <Icon className={`h-4 w-4 ${categoryColors[item.category]}`} />
                 <div>
-                  <p className="text-sm text-white">{item.description}</p>
-                  <p className="text-xs text-emerald-400">New charge (staged)</p>
+                  <p className="text-sm text-foreground">{item.description}</p>
+                  <p className="text-[11px] text-success">
+                    New charge (staged)
+                  </p>
                 </div>
               </div>
-              <span className="text-sm text-emerald-400">+${item.amount.toFixed(2)}</span>
+              <span className="text-sm text-success">
+                +${item.amount.toFixed(2)}
+              </span>
             </div>
           );
         })}
       </div>
 
       {/* Totals */}
-      <div className="p-4 border-t border-slate-700 bg-slate-700/30 space-y-2">
+      <div className="space-y-1.5 border-t border-border bg-muted/30 p-4">
         <div className="flex justify-between text-sm">
-          <span className="text-slate-400">Subtotal</span>
-          <span className="text-white">${subtotal.toFixed(2)}</span>
+          <span className="text-muted-foreground">Subtotal</span>
+          <span className="text-foreground">${subtotal.toFixed(2)}</span>
         </div>
         {tax > 0 && (
           <div className="flex justify-between text-sm">
-            <span className="text-slate-400">Tax</span>
-            <span className="text-white">${tax.toFixed(2)}</span>
+            <span className="text-muted-foreground">Tax</span>
+            <span className="text-foreground">${tax.toFixed(2)}</span>
           </div>
         )}
         {stagedAdjustment !== 0 && (
           <div className="flex justify-between text-sm">
-            <span className="text-amber-400">Pending Adjustments</span>
-            <span className={stagedAdjustment < 0 ? "text-emerald-400" : "text-amber-400"}>
-              {stagedAdjustment < 0 ? "-" : "+"}${Math.abs(stagedAdjustment).toFixed(2)}
+            <span className="text-warning">Pending Adjustments</span>
+            <span
+              className={stagedAdjustment < 0 ? "text-success" : "text-warning"}
+            >
+              {stagedAdjustment < 0 ? "-" : "+"}$
+              {Math.abs(stagedAdjustment).toFixed(2)}
             </span>
           </div>
         )}
-        <div className="flex justify-between text-lg font-bold pt-2 border-t border-slate-600">
-          <span className="text-white">Total</span>
-          <span className="text-white">${total.toFixed(2)}</span>
+        <div className="flex justify-between border-t border-border pt-2 text-base font-semibold">
+          <span className="text-foreground">Total</span>
+          <span className="text-foreground">${total.toFixed(2)}</span>
         </div>
       </div>
 
       {stagedChanges.length > 0 && (
-        <div className="p-3 bg-amber-500/10 text-center">
-          <span className="text-sm text-amber-400">
-            {stagedChanges.length} pending change{stagedChanges.length !== 1 ? "s" : ""} - Click "Save" to apply
+        <div className="bg-warning/10 p-3 text-center">
+          <span className="text-xs text-warning">
+            {stagedChanges.length} pending change
+            {stagedChanges.length !== 1 ? "s" : ""} - Click "Save" to apply
           </span>
         </div>
       )}

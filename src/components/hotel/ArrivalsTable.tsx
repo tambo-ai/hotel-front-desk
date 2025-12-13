@@ -1,27 +1,29 @@
 "use client";
 
 import { z } from "zod";
-import { ReservationSchema } from "@/lib/hotel-types";
+import { ReservationSchema, tierColors } from "@/lib/hotel-types";
 import { useHotel } from "@/lib/hotel-store";
 import { guests } from "@/data/mock-data";
 import { Clock, Award, BedDouble, MessageSquare, User } from "lucide-react";
 
 // Schema for Tambo component registration
 export const ArrivalsTablePropsSchema = z.object({
-  reservations: z.array(ReservationSchema).optional().describe("Reservations to display (defaults to today's arrivals)"),
-  highlightedIds: z.array(z.string()).optional().describe("Reservation IDs to highlight"),
-  showVipOnly: z.boolean().optional().describe("Only show VIP (Gold/Platinum) guests"),
+  reservations: z
+    .array(ReservationSchema)
+    .optional()
+    .describe("Reservations to display (defaults to today's arrivals)"),
+  highlightedIds: z
+    .array(z.string())
+    .optional()
+    .describe("Reservation IDs to highlight"),
+  showVipOnly: z
+    .boolean()
+    .optional()
+    .describe("Only show VIP (Gold/Platinum) guests"),
   compact: z.boolean().optional().describe("Compact mode for chat embedding"),
 });
 
 export type ArrivalsTableProps = z.infer<typeof ArrivalsTablePropsSchema>;
-
-const tierColors = {
-  Member: "bg-slate-600",
-  Silver: "bg-slate-400",
-  Gold: "bg-amber-500",
-  Platinum: "bg-purple-500",
-};
 
 export function ArrivalsTable({
   reservations: providedReservations,
@@ -29,7 +31,8 @@ export function ArrivalsTable({
   showVipOnly = false,
   compact = false,
 }: ArrivalsTableProps) {
-  const { state, getTodaysArrivals, selectReservation, startCheckIn } = useHotel();
+  const { state, getTodaysArrivals, selectReservation, startCheckIn } =
+    useHotel();
 
   // Get arrivals from props or state
   let arrivals = providedReservations || getTodaysArrivals();
@@ -54,20 +57,24 @@ export function ArrivalsTable({
 
   if (arrivals.length === 0) {
     return (
-      <div className="bg-slate-800 rounded-lg p-6 text-center">
-        <User className="w-12 h-12 text-slate-600 mx-auto mb-2" />
-        <p className="text-slate-400">No arrivals {showVipOnly ? "(VIP only)" : ""} for today</p>
+      <div className="flex flex-col items-center justify-center rounded-lg border border-dashed border-border bg-card/50 p-12 text-center">
+        <div className="mb-3 rounded-full bg-muted p-3">
+          <User className="h-6 w-6 text-muted-foreground" />
+        </div>
+        <p className="text-sm text-muted-foreground">
+          No arrivals {showVipOnly ? "(VIP only)" : ""} for today
+        </p>
       </div>
     );
   }
 
   if (compact) {
     return (
-      <div className="bg-slate-800 rounded-lg p-3">
-        <h3 className="text-sm font-medium text-slate-400 mb-2">
+      <div className="rounded-lg border border-border bg-card p-3">
+        <h3 className="mb-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
           Today's Arrivals ({arrivals.length})
         </h3>
-        <div className="space-y-2">
+        <div className="space-y-1">
           {arrivals.slice(0, 5).map((res) => {
             const guest = guests.find((g) => g.id === res.guestId);
             const isHighlighted = highlighted.includes(res.id);
@@ -75,23 +82,27 @@ export function ArrivalsTable({
             return (
               <div
                 key={res.id}
-                className={`flex items-center justify-between p-2 rounded ${
-                  isHighlighted ? "bg-amber-500/20 ring-1 ring-amber-500" : "bg-slate-700/50"
+                className={`flex items-center justify-between rounded-md px-2.5 py-2 transition-colors ${
+                  isHighlighted
+                    ? "bg-accent/15 ring-1 ring-accent/50"
+                    : "bg-secondary/50 hover:bg-secondary"
                 }`}
               >
                 <div className="flex items-center gap-2">
                   {guest && (
-                    <span className={`w-2 h-2 rounded-full ${tierColors[guest.loyaltyTier]}`} />
+                    <span
+                      className={`h-1.5 w-1.5 rounded-full ${tierColors[guest.loyaltyTier]}`}
+                    />
                   )}
-                  <span className="text-sm text-white">
+                  <span className="text-sm text-foreground">
                     {guest?.firstName} {guest?.lastName}
                   </span>
                 </div>
-                <div className="flex items-center gap-2 text-xs text-slate-400">
+                <div className="flex items-center gap-2 text-xs text-muted-foreground">
                   <span>{res.roomType}</span>
                   {res.estimatedArrivalTime && (
                     <span className="flex items-center gap-1">
-                      <Clock className="w-3 h-3" />
+                      <Clock className="h-3 w-3" />
                       {res.estimatedArrivalTime}
                     </span>
                   )}
@@ -100,7 +111,7 @@ export function ArrivalsTable({
             );
           })}
           {arrivals.length > 5 && (
-            <p className="text-xs text-slate-500 text-center">
+            <p className="pt-1 text-center text-xs text-muted-foreground">
               +{arrivals.length - 5} more arrivals
             </p>
           )}
@@ -110,94 +121,113 @@ export function ArrivalsTable({
   }
 
   return (
-    <div className="bg-slate-800 rounded-lg overflow-hidden">
-      <div className="p-4 border-b border-slate-700">
-        <h3 className="text-lg font-semibold text-white">
+    <div className="overflow-hidden rounded-lg border border-border bg-card">
+      <div className="border-b border-border px-4 py-3">
+        <h3 className="text-sm font-medium text-foreground">
           Today's Arrivals
-          <span className="text-slate-400 text-sm font-normal ml-2">({arrivals.length})</span>
+          <span className="ml-2 text-muted-foreground">
+            ({arrivals.length})
+          </span>
         </h3>
       </div>
 
       <div className="overflow-x-auto">
         <table className="w-full">
-          <thead className="bg-slate-700/50">
-            <tr>
-              <th className="text-left text-xs font-medium text-slate-400 uppercase tracking-wide px-4 py-3">
+          <thead>
+            <tr className="border-b border-border bg-muted/30">
+              <th className="px-4 py-2.5 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground">
                 Guest
               </th>
-              <th className="text-left text-xs font-medium text-slate-400 uppercase tracking-wide px-4 py-3">
+              <th className="px-4 py-2.5 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground">
                 Confirmation
               </th>
-              <th className="text-left text-xs font-medium text-slate-400 uppercase tracking-wide px-4 py-3">
+              <th className="px-4 py-2.5 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground">
                 Room
               </th>
-              <th className="text-left text-xs font-medium text-slate-400 uppercase tracking-wide px-4 py-3">
+              <th className="px-4 py-2.5 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground">
                 ETA
               </th>
-              <th className="text-left text-xs font-medium text-slate-400 uppercase tracking-wide px-4 py-3">
+              <th className="px-4 py-2.5 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground">
                 Notes
               </th>
-              <th className="text-right text-xs font-medium text-slate-400 uppercase tracking-wide px-4 py-3">
+              <th className="px-4 py-2.5 text-right text-xs font-medium uppercase tracking-wide text-muted-foreground">
                 Action
               </th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-700/50">
-            {arrivals.map((res) => {
+          <tbody>
+            {arrivals.map((res, idx) => {
               const guest = guests.find((g) => g.id === res.guestId);
               const isHighlighted = highlighted.includes(res.id);
-              const isVip = guest?.loyaltyTier === "Gold" || guest?.loyaltyTier === "Platinum";
+              const isVip =
+                guest?.loyaltyTier === "Gold" ||
+                guest?.loyaltyTier === "Platinum";
 
               return (
                 <tr
                   key={res.id}
-                  className={`hover:bg-slate-700/30 cursor-pointer transition-colors ${
-                    isHighlighted ? "bg-amber-500/20" : ""
+                  className={`cursor-pointer border-b border-border transition-colors last:border-0 hover:bg-hover-bg ${
+                    isHighlighted ? "bg-accent/10" : ""
                   }`}
                   onClick={() => selectReservation(res.id)}
                 >
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-2">
                       {guest && (
-                        <span className={`px-1.5 py-0.5 rounded text-[10px] text-white ${tierColors[guest.loyaltyTier]}`}>
-                          {guest.loyaltyTier === "Platinum" ? "PLT" : guest.loyaltyTier === "Gold" ? "GLD" : guest.loyaltyTier.substring(0, 3).toUpperCase()}
+                        <span
+                          className={`rounded px-1.5 py-0.5 text-[10px] font-semibold text-white ${tierColors[guest.loyaltyTier]}`}
+                        >
+                          {guest.loyaltyTier === "Platinum"
+                            ? "PLT"
+                            : guest.loyaltyTier === "Gold"
+                              ? "GLD"
+                              : guest.loyaltyTier.substring(0, 3).toUpperCase()}
                         </span>
                       )}
-                      <span className="text-white font-medium">
+                      <span className="font-medium text-foreground">
                         {guest?.firstName} {guest?.lastName}
                       </span>
-                      {isVip && <Award className="w-4 h-4 text-amber-400" />}
+                      {isVip && <Award className="h-3.5 w-3.5 text-warning" />}
                     </div>
                   </td>
                   <td className="px-4 py-3">
-                    <span className="text-slate-300 font-mono text-sm">{res.confirmationNumber}</span>
+                    <code className="rounded bg-muted px-1.5 py-0.5 font-mono text-xs text-muted-foreground">
+                      {res.confirmationNumber}
+                    </code>
                   </td>
                   <td className="px-4 py-3">
-                    <div className="flex items-center gap-2">
-                      <BedDouble className="w-4 h-4 text-slate-500" />
-                      <span className="text-slate-300">
-                        {res.roomNumber ? `Room ${res.roomNumber}` : res.roomType}
+                    <div className="flex items-center gap-1.5">
+                      <BedDouble className="h-3.5 w-3.5 text-muted-foreground" />
+                      <span className="text-sm text-foreground">
+                        {res.roomNumber
+                          ? `Room ${res.roomNumber}`
+                          : res.roomType}
                       </span>
                     </div>
                   </td>
                   <td className="px-4 py-3">
                     {res.estimatedArrivalTime ? (
-                      <div className="flex items-center gap-1 text-slate-300">
-                        <Clock className="w-4 h-4 text-slate-500" />
+                      <div className="flex items-center gap-1.5 text-sm text-foreground">
+                        <Clock className="h-3.5 w-3.5 text-muted-foreground" />
                         {res.estimatedArrivalTime}
                       </div>
                     ) : (
-                      <span className="text-slate-500">—</span>
+                      <span className="text-muted-foreground/50">—</span>
                     )}
                   </td>
                   <td className="px-4 py-3">
                     {res.specialRequests.length > 0 ? (
-                      <div className="flex items-center gap-1 text-slate-400" title={res.specialRequests.join(", ")}>
-                        <MessageSquare className="w-4 h-4" />
-                        <span className="text-xs">{res.specialRequests.length} request(s)</span>
+                      <div
+                        className="flex items-center gap-1.5 text-muted-foreground"
+                        title={res.specialRequests.join(", ")}
+                      >
+                        <MessageSquare className="h-3.5 w-3.5" />
+                        <span className="text-xs">
+                          {res.specialRequests.length} request(s)
+                        </span>
                       </div>
                     ) : (
-                      <span className="text-slate-500">—</span>
+                      <span className="text-muted-foreground/50">—</span>
                     )}
                   </td>
                   <td className="px-4 py-3 text-right">
@@ -207,13 +237,15 @@ export function ArrivalsTable({
                           e.stopPropagation();
                           startCheckIn(res.id);
                         }}
-                        className="px-3 py-1 bg-emerald-600 hover:bg-emerald-700 text-white text-sm rounded transition-colors"
+                        className="rounded-md bg-accent px-3 py-1.5 text-xs font-medium text-accent-foreground transition-all hover:opacity-90 focus-ring"
                       >
                         Check In
                       </button>
                     )}
                     {res.status === "checked_in" && (
-                      <span className="text-emerald-400 text-sm">Checked In</span>
+                      <span className="text-xs font-medium text-success">
+                        Checked In
+                      </span>
                     )}
                   </td>
                 </tr>

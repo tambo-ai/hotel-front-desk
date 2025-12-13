@@ -38,35 +38,54 @@ export function RevenueChart({
   compact = false,
 }: RevenueChartProps) {
   const difference = projectedRevenue - currentRevenue;
-  const percentChange = currentRevenue > 0 ? ((difference / currentRevenue) * 100) : 0;
+  const percentChange =
+    currentRevenue > 0 ? (difference / currentRevenue) * 100 : 0;
   const isPositive = difference >= 0;
 
   const chartData = [
     { name: "Current", value: currentRevenue, fill: "#3b82f6" },
-    { name: "Projected", value: projectedRevenue, fill: isPositive ? "#10b981" : "#ef4444" },
+    {
+      name: "Projected",
+      value: projectedRevenue,
+      fill: isPositive ? "#10b981" : "#ef4444",
+    },
   ];
 
   if (compact) {
     return (
-      <div className="bg-slate-800 rounded-lg p-3">
+      <div className="bg-card border border-border rounded-lg p-3">
         <div className="flex items-center justify-between mb-2">
-          <h3 className="text-sm font-medium text-white flex items-center gap-2">
+          <h3 className="text-sm font-medium text-foreground flex items-center gap-2">
             <DollarSign className="w-4 h-4 text-emerald-400" />
             Revenue Projection
           </h3>
-          <div className={`flex items-center gap-1 ${isPositive ? "text-emerald-400" : "text-red-400"}`}>
-            {isPositive ? <TrendingUp className="w-4 h-4" /> : <TrendingDown className="w-4 h-4" />}
-            <span className="font-bold">{isPositive ? "+" : ""}${difference.toFixed(0)}</span>
+          <div
+            className={`flex items-center gap-1 ${isPositive ? "text-emerald-400" : "text-red-400"}`}
+          >
+            {isPositive ? (
+              <TrendingUp className="w-4 h-4" />
+            ) : (
+              <TrendingDown className="w-4 h-4" />
+            )}
+            <span className="font-bold">
+              {isPositive ? "+" : ""}${difference.toFixed(0)}
+            </span>
           </div>
         </div>
         <div className="grid grid-cols-2 gap-2 text-sm">
-          <div className="bg-slate-700/50 rounded p-2">
-            <div className="text-slate-400 text-xs">Current</div>
-            <div className="text-white font-medium">${currentRevenue.toFixed(0)}</div>
+          <div className="bg-secondary/50 rounded p-2">
+            <div className="text-muted-foreground text-xs">Current</div>
+            <div className="text-foreground font-medium">
+              ${currentRevenue.toFixed(0)}
+            </div>
           </div>
-          <div className={`rounded p-2 ${isPositive ? "bg-emerald-500/20" : "bg-red-500/20"}`}>
-            <div className="text-slate-400 text-xs">Projected</div>
-            <div className={`font-medium ${isPositive ? "text-emerald-400" : "text-red-400"}`}>
+          <div
+            className={`rounded p-2 ${isPositive ? "bg-emerald-500/20" : "bg-red-500/20"}`}
+          >
+            <div className="text-muted-foreground text-xs">Projected</div>
+            <div
+              className={`font-medium ${isPositive ? "text-emerald-400" : "text-red-400"}`}
+            >
               ${projectedRevenue.toFixed(0)}
             </div>
           </div>
@@ -76,24 +95,33 @@ export function RevenueChart({
   }
 
   return (
-    <div className="bg-slate-800 rounded-lg overflow-hidden">
-      <div className="p-4 border-b border-slate-700">
+    <div className="bg-card border border-border rounded-lg overflow-hidden">
+      <div className="p-4 border-b border-border">
         <div className="flex items-center justify-between">
-          <h3 className="text-lg font-semibold text-white flex items-center gap-2">
+          <h3 className="text-lg font-semibold text-foreground flex items-center gap-2">
             <DollarSign className="w-5 h-5 text-emerald-400" />
             Revenue Projection
           </h3>
-          <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full ${
-            isPositive ? "bg-emerald-500/20 text-emerald-400" : "bg-red-500/20 text-red-400"
-          }`}>
-            {isPositive ? <TrendingUp className="w-4 h-4" /> : <TrendingDown className="w-4 h-4" />}
+          <div
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-full ${
+              isPositive
+                ? "bg-emerald-500/20 text-emerald-400"
+                : "bg-red-500/20 text-red-400"
+            }`}
+          >
+            {isPositive ? (
+              <TrendingUp className="w-4 h-4" />
+            ) : (
+              <TrendingDown className="w-4 h-4" />
+            )}
             <span className="font-medium">
-              {isPositive ? "+" : ""}{percentChange.toFixed(1)}%
+              {isPositive ? "+" : ""}
+              {percentChange.toFixed(1)}%
             </span>
           </div>
         </div>
         {(roomType || date) && (
-          <p className="text-sm text-slate-400 mt-1">
+          <p className="text-sm text-muted-foreground mt-1">
             {roomType && <span>{roomType} rooms</span>}
             {roomType && date && <span> • </span>}
             {date && <span>{new Date(date).toLocaleDateString()}</span>}
@@ -105,16 +133,34 @@ export function RevenueChart({
         <div className="h-48">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={chartData} layout="vertical">
-              <CartesianGrid strokeDasharray="3 3" stroke="#374151" horizontal={false} />
-              <XAxis type="number" stroke="#9ca3af" fontSize={12} tickFormatter={(v) => `$${v}`} />
-              <YAxis type="category" dataKey="name" stroke="#9ca3af" fontSize={12} width={80} />
+              <CartesianGrid
+                strokeDasharray="3 3"
+                stroke="var(--border)"
+                horizontal={false}
+              />
+              <XAxis
+                type="number"
+                stroke="var(--muted-foreground)"
+                fontSize={12}
+                tickFormatter={(v) => `$${v}`}
+              />
+              <YAxis
+                type="category"
+                dataKey="name"
+                stroke="var(--muted-foreground)"
+                fontSize={12}
+                width={80}
+              />
               <Tooltip
                 contentStyle={{
-                  backgroundColor: "#1e293b",
-                  border: "1px solid #374151",
+                  backgroundColor: "var(--card)",
+                  border: "1px solid var(--border)",
                   borderRadius: "8px",
                 }}
-                formatter={(value: number | undefined) => [`$${(value ?? 0).toFixed(2)}`, "Revenue"]}
+                formatter={(value: number | undefined) => [
+                  `$${(value ?? 0).toFixed(2)}`,
+                  "Revenue",
+                ]}
               />
               <Bar dataKey="value" radius={[0, 4, 4, 0]}>
                 {chartData.map((entry, index) => (
@@ -127,41 +173,61 @@ export function RevenueChart({
 
         {/* Breakdown */}
         <div className="mt-4 grid grid-cols-3 gap-4">
-          <div className="bg-slate-700/50 rounded-lg p-3 text-center">
-            <div className="text-2xl font-bold text-white">${currentRevenue.toFixed(0)}</div>
-            <div className="text-xs text-slate-400">Current Revenue</div>
+          <div className="bg-secondary/50 rounded-lg p-3 text-center">
+            <div className="text-2xl font-bold text-foreground">
+              ${currentRevenue.toFixed(0)}
+            </div>
+            <div className="text-xs text-muted-foreground">Current Revenue</div>
           </div>
-          <div className={`rounded-lg p-3 text-center ${isPositive ? "bg-emerald-500/20" : "bg-red-500/20"}`}>
-            <div className={`text-2xl font-bold ${isPositive ? "text-emerald-400" : "text-red-400"}`}>
+          <div
+            className={`rounded-lg p-3 text-center ${isPositive ? "bg-emerald-500/20" : "bg-red-500/20"}`}
+          >
+            <div
+              className={`text-2xl font-bold ${isPositive ? "text-emerald-400" : "text-red-400"}`}
+            >
               {isPositive ? "+" : ""}${difference.toFixed(0)}
             </div>
-            <div className="text-xs text-slate-400">Difference</div>
+            <div className="text-xs text-muted-foreground">Difference</div>
           </div>
-          <div className="bg-slate-700/50 rounded-lg p-3 text-center">
-            <div className="text-2xl font-bold text-white">${projectedRevenue.toFixed(0)}</div>
-            <div className="text-xs text-slate-400">Projected Revenue</div>
+          <div className="bg-secondary/50 rounded-lg p-3 text-center">
+            <div className="text-2xl font-bold text-foreground">
+              ${projectedRevenue.toFixed(0)}
+            </div>
+            <div className="text-xs text-muted-foreground">
+              Projected Revenue
+            </div>
           </div>
         </div>
 
         {/* Rate Change Details */}
-        {(currentRate && newRate) && (
-          <div className="mt-4 p-3 bg-slate-700/30 rounded-lg">
-            <h4 className="text-sm font-medium text-slate-400 mb-2">Rate Change Details</h4>
+        {currentRate && newRate && (
+          <div className="mt-4 p-3 bg-secondary/30 rounded-lg">
+            <h4 className="text-sm font-medium text-muted-foreground mb-2">
+              Rate Change Details
+            </h4>
             <div className="grid grid-cols-2 gap-4 text-sm">
               <div>
-                <span className="text-slate-500">Current Rate:</span>
-                <span className="text-white ml-2">${currentRate}/night</span>
+                <span className="text-muted-foreground">Current Rate:</span>
+                <span className="text-foreground ml-2">
+                  ${currentRate}/night
+                </span>
               </div>
               <div>
-                <span className="text-slate-500">New Rate:</span>
-                <span className={`ml-2 ${newRate < currentRate ? "text-emerald-400" : "text-amber-400"}`}>
+                <span className="text-muted-foreground">New Rate:</span>
+                <span
+                  className={`ml-2 ${newRate < currentRate ? "text-emerald-400" : "text-amber-400"}`}
+                >
                   ${newRate}/night
                 </span>
               </div>
               {affectedRooms && (
                 <div className="col-span-2">
-                  <span className="text-slate-500">Affected Inventory:</span>
-                  <span className="text-white ml-2">{affectedRooms} rooms</span>
+                  <span className="text-muted-foreground">
+                    Affected Inventory:
+                  </span>
+                  <span className="text-foreground ml-2">
+                    {affectedRooms} rooms
+                  </span>
                 </div>
               )}
             </div>
