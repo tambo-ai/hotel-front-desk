@@ -3,6 +3,7 @@
 import { useHotel } from "@/lib/hotel-store";
 import type { Room, RoomStatus, RoomType } from "@/lib/hotel-types";
 import { z } from "zod";
+import { Sparkles } from "lucide-react";
 
 // Schema for Tambo component registration
 export const RoomGridPropsSchema = z.object({
@@ -23,6 +24,12 @@ export const RoomGridPropsSchema = z.object({
   }).optional().describe("Filter criteria for rooms"),
   compact: z.boolean().optional().describe("Show compact view for chat embedding"),
   onRoomSelect: z.function().args(z.number()).returns(z.void()).optional(),
+  onEditWithAI: z.function().args(z.object({
+    roomNumber: z.number(),
+    roomType: z.string(),
+    status: z.string(),
+    features: z.array(z.string()),
+  })).returns(z.void()).optional().describe("Callback when Edit with AI button is clicked"),
 });
 
 export type RoomGridProps = z.infer<typeof RoomGridPropsSchema>;
@@ -54,15 +61,29 @@ function RoomCard({
   isHighlighted,
   isSelected,
   onClick,
+  onEditWithAI,
   compact,
 }: {
   room: Room;
   isHighlighted: boolean;
   isSelected: boolean;
   onClick: () => void;
+  onEditWithAI?: (context: { roomNumber: number; roomType: string; status: string; features: string[] }) => void;
   compact?: boolean;
 }) {
   const hasFeatures = room.features.length > 0;
+
+  const handleAIClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (onEditWithAI) {
+      onEditWithAI({
+        roomNumber: room.number,
+        roomType: room.type,
+        status: room.status,
+        features: room.features,
+      });
+    }
+  };
 
   if (compact) {
     return (
@@ -82,40 +103,52 @@ function RoomCard({
   }
 
   return (
-    <button
-      onClick={onClick}
-      className={`
-        relative p-3 rounded-lg text-white transition-all min-w-[100px]
-        ${statusColors[room.status]}
-        ${isHighlighted ? "ring-2 ring-yellow-400 ring-offset-2 ring-offset-slate-900 scale-105" : ""}
-        ${isSelected ? "ring-2 ring-white scale-105" : ""}
-      `}
-    >
-      <div className="flex items-start justify-between">
-        <span className="text-lg font-bold">{room.number}</span>
-        <span className="text-xs px-1.5 py-0.5 bg-black/20 rounded">{room.type}</span>
-      </div>
-      <div className="mt-1 text-xs opacity-75">{statusLabels[room.status]}</div>
-      {hasFeatures && (
-        <div className="mt-1 flex flex-wrap gap-1">
-          {room.features.slice(0, 2).map((f) => (
-            <span key={f} className="text-[10px] px-1 bg-black/20 rounded">
-              {f.replace("_", " ")}
-            </span>
-          ))}
-          {room.features.length > 2 && (
-            <span className="text-[10px] px-1 bg-black/20 rounded">
-              +{room.features.length - 2}
-            </span>
-          )}
+    <div className="relative group">
+      <button
+        onClick={onClick}
+        className={`
+          relative p-3 rounded-lg text-white transition-all min-w-[100px]
+          ${statusColors[room.status]}
+          ${isHighlighted ? "ring-2 ring-yellow-400 ring-offset-2 ring-offset-slate-900 scale-105" : ""}
+          ${isSelected ? "ring-2 ring-white scale-105" : ""}
+        `}
+      >
+        <div className="flex items-start justify-between">
+          <span className="text-lg font-bold">{room.number}</span>
+          <span className="text-xs px-1.5 py-0.5 bg-black/20 rounded">{room.type}</span>
         </div>
+        <div className="mt-1 text-xs opacity-75">{statusLabels[room.status]}</div>
+        {hasFeatures && (
+          <div className="mt-1 flex flex-wrap gap-1">
+            {room.features.slice(0, 2).map((f) => (
+              <span key={f} className="text-[10px] px-1 bg-black/20 rounded">
+                {f.replace("_", " ")}
+              </span>
+            ))}
+            {room.features.length > 2 && (
+              <span className="text-[10px] px-1 bg-black/20 rounded">
+                +{room.features.length - 2}
+              </span>
+            )}
+          </div>
+        )}
+        <div className="mt-1 text-xs font-medium">${room.rate}/night</div>
+      </button>
+      {/* Edit with AI button - appears on hover */}
+      {onEditWithAI && (
+        <button
+          onClick={handleAIClick}
+          className="absolute -top-2 -right-2 p-1.5 bg-purple-600 hover:bg-purple-700 rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-opacity z-10"
+          title="Edit with AI"
+        >
+          <Sparkles className="w-3 h-3 text-white" />
+        </button>
       )}
-      <div className="mt-1 text-xs font-medium">${room.rate}/night</div>
-    </button>
+    </div>
   );
 }
 
-export function RoomGrid({ rooms, highlightedRooms, filter, compact, onRoomSelect }: RoomGridProps) {
+export function RoomGrid({ rooms, highlightedRooms, filter, compact, onRoomSelect, onEditWithAI }: RoomGridProps) {
   const hotelContext = useHotel();
   const state = hotelContext?.state;
   const selectRoom = hotelContext?.selectRoom;
@@ -216,6 +249,7 @@ export function RoomGrid({ rooms, highlightedRooms, filter, compact, onRoomSelec
                     isHighlighted={highlighted.includes(room.number)}
                     isSelected={state?.selectedRoomNumber === room.number}
                     onClick={() => handleRoomClick(room.number)}
+                    onEditWithAI={onEditWithAI}
                   />
                 ))}
             </div>

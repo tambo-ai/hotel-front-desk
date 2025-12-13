@@ -81,6 +81,7 @@ export const ReservationSchema = z.object({
   specialRequests: z.array(z.string()),
   estimatedArrivalTime: z.string().optional(),
   createdAt: z.string(),
+  isEarlyCheckout: z.boolean().optional(), // Flag for early checkout requests
 });
 export type Reservation = z.infer<typeof ReservationSchema>;
 
@@ -230,6 +231,20 @@ export interface StagedRateChange {
   newRate: number;
 }
 
+export interface StagedHousekeepingChange {
+  roomNumber: number;
+  priority?: "normal" | "rush";
+  status?: "dirty" | "in_progress" | "ready";
+  notes?: string;
+}
+
+export interface KeyGenerationData {
+  roomNumber: number;
+  guestName: string;
+  checkOutDate: string;
+  keyCount: number;
+}
+
 export interface HotelState {
   // Current view
   currentView: ViewType;
@@ -252,11 +267,14 @@ export interface HotelState {
   stagedBillingChanges: StagedBillingChange[];
   stagedRoomStatusChange: StagedRoomStatusChange | null;
   stagedRateChange: StagedRateChange | null;
+  stagedHousekeepingChange: StagedHousekeepingChange | null;
   // Highlighted elements
   highlightedRoomNumbers: number[];
   highlightedReservationIds: string[];
   // Check-in flow
   checkInReservationId: string | null;
+  // Key generation
+  keyGenerationData: KeyGenerationData | null;
 }
 
 // ============================================================================

@@ -10,6 +10,8 @@ import type {
   StagedBillingChange,
   StagedRoomStatusChange,
   StagedRateChange,
+  StagedHousekeepingChange,
+  KeyGenerationData,
   HotelState,
   Room,
   BillingItem,
@@ -56,11 +58,14 @@ const initialState: FullHotelState = {
   stagedBillingChanges: [],
   stagedRoomStatusChange: null,
   stagedRateChange: null,
+  stagedHousekeepingChange: null,
   // Highlights
   highlightedRoomNumbers: [],
   highlightedReservationIds: [],
   // Check-in
   checkInReservationId: null,
+  // Key generation
+  keyGenerationData: null,
   // Data
   rooms: initialRooms,
   reservations: initialReservations,
@@ -106,7 +111,12 @@ type HotelAction =
   | { type: "REMOVE_BILLING_ITEM"; itemId: string }
   | { type: "UPDATE_HOUSEKEEPING_TASK"; task: HousekeepingTask }
   | { type: "SET_DRAFT_MESSAGE"; message: { to: string; subject: string; body: string } | null }
-  | { type: "CLEAR_DRAFT_MESSAGE" };
+  | { type: "CLEAR_DRAFT_MESSAGE" }
+  | { type: "STAGE_HOUSEKEEPING_CHANGE"; change: StagedHousekeepingChange }
+  | { type: "CLEAR_STAGED_HOUSEKEEPING_CHANGE" }
+  | { type: "COMMIT_HOUSEKEEPING_CHANGE" }
+  | { type: "SET_KEY_GENERATION_DATA"; data: KeyGenerationData | null }
+  | { type: "CLEAR_KEY_GENERATION_DATA" };
 
 // ============================================================================
 // Reducer
@@ -365,6 +375,40 @@ function hotelReducer(state: FullHotelState, action: HotelAction): FullHotelStat
     case "CLEAR_DRAFT_MESSAGE":
       return { ...state, draftMessage: null };
 
+    case "STAGE_HOUSEKEEPING_CHANGE":
+      return { ...state, stagedHousekeepingChange: action.change };
+
+    case "CLEAR_STAGED_HOUSEKEEPING_CHANGE":
+      return { ...state, stagedHousekeepingChange: null };
+
+    case "COMMIT_HOUSEKEEPING_CHANGE": {
+      if (!state.stagedHousekeepingChange) return state;
+
+      const { roomNumber, priority, status, notes } = state.stagedHousekeepingChange;
+      const updatedTasks = state.housekeepingTasks.map(task =>
+        task.roomNumber === roomNumber
+          ? {
+              ...task,
+              priority: priority || task.priority,
+              status: status || task.status,
+              notes: notes || task.notes,
+            }
+          : task
+      );
+
+      return {
+        ...state,
+        housekeepingTasks: updatedTasks,
+        stagedHousekeepingChange: null,
+      };
+    }
+
+    case "SET_KEY_GENERATION_DATA":
+      return { ...state, keyGenerationData: action.data };
+
+    case "CLEAR_KEY_GENERATION_DATA":
+      return { ...state, keyGenerationData: null };
+
     default:
       return state;
   }
@@ -398,6 +442,10 @@ interface HotelContextValue {
   commitBillingChanges: () => void;
   commitRoomStatusChange: () => void;
   commitRateChange: () => void;
+  stageHousekeepingChange: (roomNumber: number, changes: Omit<StagedHousekeepingChange, "roomNumber">) => void;
+  commitHousekeepingChange: () => void;
+  initiateKeyGeneration: (data: KeyGenerationData) => void;
+  clearKeyGenerationData: () => void;
   setDraftMessage: (message: { to: string; subject: string; body: string } | null) => void;
   clearDraftMessage: () => void;
   // Data getters
@@ -516,6 +564,28 @@ export function HotelProvider({ children }: { children: ReactNode }) {
     dispatch({ type: "COMMIT_RATE_CHANGE" });
   }, []);
 
+  const stageHousekeepingChange = useCallback(
+    (roomNumber: number, changes: Omit<StagedHousekeepingChange, "roomNumber">) => {
+      dispatch({
+        type: "STAGE_HOUSEKEEPING_CHANGE",
+        change: { roomNumber, ...changes },
+      });
+    },
+    []
+  );
+
+  const commitHousekeepingChange = useCallback(() => {
+    dispatch({ type: "COMMIT_HOUSEKEEPING_CHANGE" });
+  }, []);
+
+  const initiateKeyGeneration = useCallback((data: KeyGenerationData) => {
+    dispatch({ type: "SET_KEY_GENERATION_DATA", data });
+  }, []);
+
+  const clearKeyGenerationData = useCallback(() => {
+    dispatch({ type: "CLEAR_KEY_GENERATION_DATA" });
+  }, []);
+
   const setDraftMessage = useCallback(
     (message: { to: string; subject: string; body: string } | null) => {
       dispatch({ type: "SET_DRAFT_MESSAGE", message });
@@ -592,6 +662,10 @@ export function HotelProvider({ children }: { children: ReactNode }) {
     commitBillingChanges,
     commitRoomStatusChange,
     commitRateChange,
+    stageHousekeepingChange,
+    commitHousekeepingChange,
+    initiateKeyGeneration,
+    clearKeyGenerationData,
     setDraftMessage,
     clearDraftMessage,
     getReservationById,

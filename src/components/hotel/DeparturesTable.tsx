@@ -4,7 +4,7 @@ import { z } from "zod";
 import { ReservationSchema } from "@/lib/hotel-types";
 import { useHotel } from "@/lib/hotel-store";
 import { guests } from "@/data/mock-data";
-import { Clock, LogOut, BedDouble, DollarSign, User } from "lucide-react";
+import { Clock, LogOut, BedDouble, DollarSign, User, AlertCircle } from "lucide-react";
 
 // Schema for Tambo component registration
 export const DeparturesTablePropsSchema = z.object({
@@ -34,10 +34,10 @@ export function DeparturesTable({
   // Get departures from props or state
   let departures = providedReservations || getTodaysDepartures();
 
-  // For demo purposes, treat some departures as "early" based on check-in date
-  // In a real app, this would be based on original checkout date vs actual
+  // Filter for early checkouts only if requested
+  // Uses the isEarlyCheckout flag from the reservation
   if (showEarlyOnly) {
-    departures = departures.filter((res, index) => index % 3 === 0); // Just filter some for demo
+    departures = departures.filter((res) => res.isEarlyCheckout === true);
   }
 
   // Use provided highlights or state highlights
@@ -64,13 +64,14 @@ export function DeparturesTable({
             const isHighlighted = highlighted.includes(res.id);
             const billing = getBillingForReservation(res.id);
             const total = billing.reduce((sum, item) => sum + item.amount, 0);
+            const isEarly = res.isEarlyCheckout === true;
 
             return (
               <div
                 key={res.id}
                 className={`flex items-center justify-between p-2 rounded ${
                   isHighlighted ? "bg-amber-500/20 ring-1 ring-amber-500" : "bg-slate-700/50"
-                }`}
+                } ${isEarly ? "border-l-2 border-l-amber-500" : ""}`}
               >
                 <div className="flex items-center gap-2">
                   {guest && (
@@ -79,6 +80,11 @@ export function DeparturesTable({
                   <span className="text-sm text-white">
                     {guest?.firstName} {guest?.lastName}
                   </span>
+                  {isEarly && (
+                    <span className="px-1 py-0.5 rounded text-[9px] text-amber-900 bg-amber-400">
+                      Early
+                    </span>
+                  )}
                 </div>
                 <div className="flex items-center gap-2 text-xs">
                   <span className="text-slate-400">Room {res.roomNumber}</span>
@@ -133,13 +139,14 @@ export function DeparturesTable({
               const isHighlighted = highlighted.includes(res.id);
               const billing = getBillingForReservation(res.id);
               const total = billing.reduce((sum, item) => sum + (item.isComped ? 0 : item.amount), 0);
+              const isEarly = res.isEarlyCheckout === true;
 
               return (
                 <tr
                   key={res.id}
                   className={`hover:bg-slate-700/30 cursor-pointer transition-colors ${
                     isHighlighted ? "bg-amber-500/20" : ""
-                  }`}
+                  } ${isEarly ? "border-l-2 border-l-amber-500" : ""}`}
                   onClick={() => selectReservation(res.id)}
                 >
                   <td className="px-4 py-3">
@@ -152,6 +159,12 @@ export function DeparturesTable({
                       <span className="text-white font-medium">
                         {guest?.firstName} {guest?.lastName}
                       </span>
+                      {isEarly && (
+                        <span className="px-1.5 py-0.5 rounded text-[10px] text-amber-900 bg-amber-400 flex items-center gap-1">
+                          <AlertCircle className="w-3 h-3" />
+                          Early
+                        </span>
+                      )}
                     </div>
                   </td>
                   <td className="px-4 py-3">

@@ -650,3 +650,295 @@ export function draftRevenueReport(args: DraftRevenueReportArgs) {
     message: "Revenue report drafted. Review and click 'Send' to deliver.",
   };
 }
+
+// ============================================================================
+// Commit Tools (Finalize Staged Changes)
+// ============================================================================
+
+export function completeCheckIn(args: { reservationId: string }) {
+  const context = getHotelContextRef();
+  if (!context) {
+    return { success: false, error: "Context not available" };
+  }
+
+  const reservation = context.state.reservations.find(r => r.id === args.reservationId);
+  if (!reservation) {
+    return { success: false, error: "Reservation not found" };
+  }
+
+  if (reservation.status !== "confirmed") {
+    return { success: false, error: `Cannot check in - reservation status is ${reservation.status}` };
+  }
+
+  // Start check-in if not already started
+  if (context.state.checkInReservationId !== args.reservationId) {
+    context.startCheckIn(args.reservationId);
+  }
+
+  // Complete the check-in (commits all staged changes)
+  context.completeCheckIn();
+
+  return {
+    success: true,
+    message: `Check-in completed for ${reservation.confirmationNumber}. Guest is now checked in.`,
+  };
+}
+
+export function commitReservationChanges(args: { reservationId: string }) {
+  const context = getHotelContextRef();
+  if (!context) {
+    return { success: false, error: "Context not available" };
+  }
+
+  const reservation = context.state.reservations.find(r => r.id === args.reservationId);
+  if (!reservation) {
+    return { success: false, error: "Reservation not found" };
+  }
+
+  // Commit room assignment if staged
+  if (context.state.stagedRoomAssignment?.reservationId === args.reservationId) {
+    context.commitRoomAssignment();
+  }
+
+  // Commit billing changes for this reservation
+  const hasBillingChanges = context.state.stagedBillingChanges.some(
+    c => c.reservationId === args.reservationId
+  );
+  if (hasBillingChanges) {
+    context.commitBillingChanges();
+  }
+
+  return {
+    success: true,
+    message: `Changes saved for reservation ${reservation.confirmationNumber}.`,
+  };
+}
+
+export function commitRoomStatusChange(args: { roomNumber: number }) {
+  const context = getHotelContextRef();
+  if (!context) {
+    return { success: false, error: "Context not available" };
+  }
+
+  const stagedChange = context.state.stagedRoomStatusChange;
+  if (!stagedChange || stagedChange.roomNumber !== args.roomNumber) {
+    return { success: false, error: "No staged status change for this room" };
+  }
+
+  context.commitRoomStatusChange();
+
+  return {
+    success: true,
+    message: `Room ${args.roomNumber} status updated to ${stagedChange.newStatus}.`,
+  };
+}
+
+export function commitHousekeepingChange(args: { roomNumber: number }) {
+  const context = getHotelContextRef();
+  if (!context) {
+    return { success: false, error: "Context not available" };
+  }
+
+  const stagedChange = context.state.stagedHousekeepingChange;
+  if (!stagedChange || stagedChange.roomNumber !== args.roomNumber) {
+    return { success: false, error: "No staged housekeeping change for this room" };
+  }
+
+  context.commitHousekeepingChange();
+
+  return {
+    success: true,
+    message: `Housekeeping updated for room ${args.roomNumber}.`,
+  };
+}
+
+export function commitRateChange(args: { roomType: string; date: string }) {
+  const context = getHotelContextRef();
+  if (!context) {
+    return { success: false, error: "Context not available" };
+  }
+
+  const stagedChange = context.state.stagedRateChange;
+  if (!stagedChange || stagedChange.roomType !== args.roomType || stagedChange.date !== args.date) {
+    return { success: false, error: "No staged rate change matching these parameters" };
+  }
+
+  context.commitRateChange();
+
+  return {
+    success: true,
+    message: `Rate updated for ${args.roomType} on ${args.date}: $${stagedChange.newRate}.`,
+  };
+}
+
+// ============================================================================
+// Housekeeping Tools
+// ============================================================================
+
+export function stageHousekeepingUpdate(args: {
+  roomNumber: number;
+  priority?: "normal" | "rush";
+  status?: "dirty" | "in_progress" | "ready";
+  notes?: string;
+}) {
+  const context = getHotelContextRef();
+  if (!context) {
+    return { success: false, error: "Context not available" };
+  }
+
+  const task = context.state.housekeepingTasks.find(t => t.roomNumber === args.roomNumber);
+  if (!task) {
+    return { success: false, error: `No housekeeping task found for room ${args.roomNumber}` };
+  }
+
+  context.stageHousekeepingChange(args.roomNumber, {
+    priority: args.priority,
+    status: args.status,
+    notes: args.notes,
+  });
+
+  const changes = [];
+  if (args.priority) changes.push(`priority: ${args.priority}`);
+  if (args.status) changes.push(`status: ${args.status}`);
+  if (args.notes) changes.push(`notes added`);
+
+  return {
+    success: true,
+    stagedChange: {
+      roomNumber: args.roomNumber,
+      previousPriority: task.priority,
+      newPriority: args.priority || task.priority,
+      previousStatus: task.status,
+      newStatus: args.status || task.status,
+    },
+    message: `Housekeeping update staged for room ${args.roomNumber}: ${changes.join(", ")}. Click 'Update Status' to confirm.`,
+  };
+}
+
+export function getEarlyCheckouts() {
+  const context = getHotelContextRef();
+  if (!context) {
+    return { error: "Context not available", checkouts: [] };
+  }
+
+  const today = new Date().toISOString().split("T")[0];
+  const departures = context.state.reservations.filter(
+    r => r.checkOutDate === today && r.status === "checked_in"
+  );
+
+  // Filter to early checkouts (those marked or before scheduled time)
+  const earlyCheckouts = departures.filter(r => r.isEarlyCheckout === true);
+
+  // Navigate to departures view
+  context.navigateTo("reservations");
+  if (earlyCheckouts.length > 0) {
+    context.highlightReservations(earlyCheckouts.map(r => r.id));
+  }
+
+  return {
+    count: earlyCheckouts.length,
+    totalDepartures: departures.length,
+    checkouts: earlyCheckouts.map(r => ({
+      id: r.id,
+      confirmationNumber: r.confirmationNumber,
+      guestId: r.guestId,
+      roomNumber: r.roomNumber,
+    })),
+    message: `Found ${earlyCheckouts.length} early checkout(s) out of ${departures.length} total departures today.`,
+  };
+}
+
+// ============================================================================
+// Guest Services Tools
+// ============================================================================
+
+export function getGuestByRoom(args: { roomNumber: number }) {
+  const context = getHotelContextRef();
+  if (!context) {
+    return { error: "Context not available" };
+  }
+
+  const room = context.state.rooms.find(r => r.number === args.roomNumber);
+  if (!room) {
+    return { error: `Room ${args.roomNumber} not found` };
+  }
+
+  if (room.status !== "occupied" || !room.currentGuestId) {
+    return {
+      error: `Room ${args.roomNumber} is not currently occupied`,
+      roomStatus: room.status,
+    };
+  }
+
+  const guest = guests.find(g => g.id === room.currentGuestId);
+  if (!guest) {
+    return { error: "Guest not found" };
+  }
+
+  // Find the current reservation
+  const reservation = context.state.reservations.find(
+    r => r.guestId === guest.id && r.roomNumber === args.roomNumber && r.status === "checked_in"
+  );
+
+  // Navigate and select
+  context.selectRoom(args.roomNumber);
+  context.selectGuest(guest.id);
+  context.navigateTo("guests");
+
+  return {
+    guest,
+    room,
+    reservation,
+    message: `Found ${guest.firstName} ${guest.lastName} in room ${args.roomNumber}.`,
+  };
+}
+
+export function initiateKeyGeneration(args: {
+  roomNumber: number;
+  guestId: string;
+  keyCount?: number;
+}) {
+  const context = getHotelContextRef();
+  if (!context) {
+    return { success: false, error: "Context not available" };
+  }
+
+  const room = context.state.rooms.find(r => r.number === args.roomNumber);
+  if (!room) {
+    return { success: false, error: `Room ${args.roomNumber} not found` };
+  }
+
+  const guest = guests.find(g => g.id === args.guestId);
+  if (!guest) {
+    return { success: false, error: "Guest not found" };
+  }
+
+  const reservation = context.state.reservations.find(
+    r => r.guestId === args.guestId && r.roomNumber === args.roomNumber && r.status === "checked_in"
+  );
+
+  if (!reservation) {
+    return { success: false, error: "No active reservation found for this guest and room" };
+  }
+
+  const keyCount = args.keyCount || 2;
+
+  // Set key generation state
+  context.initiateKeyGeneration({
+    roomNumber: args.roomNumber,
+    guestName: `${guest.firstName} ${guest.lastName}`,
+    checkOutDate: reservation.checkOutDate,
+    keyCount,
+  });
+
+  return {
+    success: true,
+    keyData: {
+      roomNumber: args.roomNumber,
+      guestName: `${guest.firstName} ${guest.lastName}`,
+      checkOutDate: reservation.checkOutDate,
+      keyCount,
+    },
+    message: `Key generation initiated for ${guest.firstName} ${guest.lastName}, room ${args.roomNumber}. ${keyCount} key(s) ready to print.`,
+  };
+}

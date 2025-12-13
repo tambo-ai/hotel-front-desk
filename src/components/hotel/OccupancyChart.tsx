@@ -18,25 +18,43 @@ import {
 } from "recharts";
 import { TrendingUp } from "lucide-react";
 
+// Competitor data schema
+const CompetitorDataPointSchema = z.object({
+  date: z.string(),
+  competitorA: z.number().optional(),
+  competitorB: z.number().optional(),
+  competitorC: z.number().optional(),
+});
+
 // Schema for Tambo component registration
 export const OccupancyChartPropsSchema = z.object({
   data: z.array(OccupancyDataSchema).optional().describe("Occupancy data to display"),
+  competitorData: z.array(CompetitorDataPointSchema).optional().describe("Competitor rate data for overlay"),
+  historicalData: z.array(OccupancyDataSchema).optional().describe("Historical data for YoY comparison"),
   showCompetitors: z.boolean().optional().describe("Show competitor rate comparison"),
   showHistorical: z.boolean().optional().describe("Show historical comparison"),
   chartType: z.enum(["line", "bar", "composed"]).optional().describe("Chart type"),
   dateRange: z.enum(["week", "month", "custom"]).optional().describe("Date range to show"),
   compact: z.boolean().optional().describe("Compact mode for chat embedding"),
+  onDataPointClick: z.function().args(z.object({
+    date: z.string(),
+    occupancyRate: z.number(),
+    revenue: z.number(),
+  })).returns(z.void()).optional().describe("Callback when a data point is clicked"),
 });
 
 export type OccupancyChartProps = z.infer<typeof OccupancyChartPropsSchema>;
 
 export function OccupancyChart({
   data: providedData,
+  competitorData,
+  historicalData,
   showCompetitors = false,
   showHistorical = false,
   chartType = "line",
   dateRange = "week",
   compact = false,
+  onDataPointClick,
 }: OccupancyChartProps) {
   // Get data from props or default
   let chartData = providedData || occupancyData;
@@ -66,9 +84,12 @@ export function OccupancyChart({
     shortLabel: new Date(d.date).toLocaleDateString("en-US", { weekday: "short" }),
   }));
 
+  // Use provided historical data or fall back to default mock data
+  const historicalSource = historicalData || historicalOccupancy;
+
   if (showHistorical) {
     mergedData = mergedData.map((d) => {
-      const historicalMatch = historicalOccupancy.find((h) => {
+      const historicalMatch = historicalSource.find((h) => {
         // Match by day of week for last year comparison
         const currentDow = new Date(d.date).getDay();
         const historicalDow = new Date(h.date).getDay();
@@ -80,6 +101,26 @@ export function OccupancyChart({
       };
     });
   }
+
+  // Merge competitor data if provided
+  if (showCompetitors && competitorData) {
+    mergedData = mergedData.map((d) => {
+      const competitorMatch = competitorData.find((c) => c.date === d.date);
+      return {
+        ...d,
+        competitorA: competitorMatch?.competitorA,
+        competitorB: competitorMatch?.competitorB,
+        competitorC: competitorMatch?.competitorC,
+      };
+    });
+  }
+
+  // Click handler for data points
+  const handleDataPointClick = (data: { date: string; occupancyRate: number; revenue: number }) => {
+    if (onDataPointClick) {
+      onDataPointClick(data);
+    }
+  };
 
   // Calculate summary stats
   const avgOccupancy = Math.round(
@@ -187,7 +228,19 @@ export function OccupancyChart({
 
     // Default: line chart
     return (
-      <LineChart data={mergedData}>
+      <LineChart
+        data={mergedData}
+        onClick={(e) => {
+          if (e && e.activePayload && e.activePayload[0]) {
+            const payload = e.activePayload[0].payload;
+            handleDataPointClick({
+              date: payload.date,
+              occupancyRate: payload.occupancyRate,
+              revenue: payload.revenue,
+            });
+          }
+        }}
+      >
         <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
         <XAxis dataKey="shortLabel" stroke="#9ca3af" fontSize={12} />
         <YAxis stroke="#9ca3af" fontSize={12} domain={[0, 100]} />
@@ -198,10 +251,12 @@ export function OccupancyChart({
             borderRadius: "8px",
           }}
           labelStyle={{ color: "#fff" }}
-          formatter={(value: number, name: string) => [
-            `${value}%`,
-            name === "occupancyRate" ? "Current" : "Last Year",
-          ]}
+          formatter={(value: number, name: string) => {
+            if (name === "occupancyRate") return [`${value}%`, "Current"];
+            if (name === "historicalOccupancy") return [`${value}%`, "Last Year"];
+            if (name.startsWith("competitor")) return [`${value}%`, name.replace("competitor", "Competitor ")];
+            return [`${value}%`, name];
+          }}
         />
         <Legend />
         <Line
@@ -210,8 +265,8 @@ export function OccupancyChart({
           name="Occupancy %"
           stroke="#10b981"
           strokeWidth={2}
-          dot={{ fill: "#10b981", strokeWidth: 2 }}
-          activeDot={{ r: 6 }}
+          dot={{ fill: "#10b981", strokeWidth: 2, cursor: onDataPointClick ? "pointer" : "default" }}
+          activeDot={{ r: 6, cursor: onDataPointClick ? "pointer" : "default" }}
         />
         {showHistorical && (
           <Line
@@ -223,6 +278,37 @@ export function OccupancyChart({
             strokeDasharray="5 5"
             dot={{ fill: "#6b7280", strokeWidth: 2 }}
           />
+        )}
+        {showCompetitors && competitorData && (
+          <>
+            <Line
+              type="monotone"
+              dataKey="competitorA"
+              name="Competitor A"
+              stroke="#f59e0b"
+              strokeWidth={1}
+              strokeDasharray="3 3"
+              dot={false}
+            />
+            <Line
+              type="monotone"
+              dataKey="competitorB"
+              name="Competitor B"
+              stroke="#ef4444"
+              strokeWidth={1}
+              strokeDasharray="3 3"
+              dot={false}
+            />
+            <Line
+              type="monotone"
+              dataKey="competitorC"
+              name="Competitor C"
+              stroke="#8b5cf6"
+              strokeWidth={1}
+              strokeDasharray="3 3"
+              dot={false}
+            />
+          </>
         )}
       </LineChart>
     );
@@ -261,7 +347,13 @@ export function OccupancyChart({
       <div className="px-4 pb-4">
         <div className="grid grid-cols-7 gap-2">
           {mergedData.slice(-7).map((d) => (
-            <div key={d.date} className="text-center">
+            <button
+              key={d.date}
+              onClick={() => handleDataPointClick({ date: d.date, occupancyRate: d.occupancyRate, revenue: d.revenue })}
+              className={`text-center p-1 rounded transition-colors ${
+                onDataPointClick ? "hover:bg-slate-700 cursor-pointer" : ""
+              }`}
+            >
               <div className="text-xs text-slate-500">{d.shortLabel}</div>
               <div
                 className={`text-sm font-medium ${
@@ -274,7 +366,7 @@ export function OccupancyChart({
               >
                 {d.occupancyRate}%
               </div>
-            </div>
+            </button>
           ))}
         </div>
       </div>
