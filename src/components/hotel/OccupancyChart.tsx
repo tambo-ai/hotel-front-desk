@@ -231,8 +231,9 @@ export function OccupancyChart({
       <LineChart
         data={mergedData}
         onClick={(e) => {
-          if (e && e.activePayload && e.activePayload[0]) {
-            const payload = e.activePayload[0].payload;
+          const event = e as { activePayload?: Array<{ payload: { date: string; occupancyRate: number; revenue: number } }> };
+          if (event?.activePayload?.[0]) {
+            const payload = event.activePayload[0].payload;
             handleDataPointClick({
               date: payload.date,
               occupancyRate: payload.occupancyRate,
