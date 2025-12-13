@@ -1,0 +1,26 @@
+"use client";
+
+import { Dashboard } from "@/components/hotel/Dashboard";
+import { MessageThreadCollapsible } from "@/components/tambo/message-thread-collapsible";
+import { HotelProvider } from "@/lib/hotel-store";
+import { components, tools } from "@/lib/tambo";
+import { TamboProvider } from "@tambo-ai/react";
+
+export default function Home() {
+  return (
+    <TamboProvider
+      apiKey={process.env.NEXT_PUBLIC_TAMBO_API_KEY!}
+      components={components}
+      tools={tools}
+      tamboUrl={process.env.NEXT_PUBLIC_TAMBO_URL}
+    >
+      <HotelProvider>
+        <Dashboard />
+        <MessageThreadCollapsible
+          contextKey="hotel-front-desk"
+          defaultOpen={false}
+        />
+      </HotelProvider>
+    </TamboProvider>
+  );
+}
