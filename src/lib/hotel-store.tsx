@@ -116,7 +116,8 @@ type HotelAction =
   | { type: "CLEAR_STAGED_HOUSEKEEPING_CHANGE" }
   | { type: "COMMIT_HOUSEKEEPING_CHANGE" }
   | { type: "SET_KEY_GENERATION_DATA"; data: KeyGenerationData | null }
-  | { type: "CLEAR_KEY_GENERATION_DATA" };
+  | { type: "CLEAR_KEY_GENERATION_DATA" }
+  | { type: "RESET_STATE" };
 
 // ============================================================================
 // Reducer
@@ -409,6 +410,9 @@ function hotelReducer(state: FullHotelState, action: HotelAction): FullHotelStat
     case "CLEAR_KEY_GENERATION_DATA":
       return { ...state, keyGenerationData: null };
 
+    case "RESET_STATE":
+      return initialState;
+
     default:
       return state;
   }
@@ -448,6 +452,7 @@ interface HotelContextValue {
   clearKeyGenerationData: () => void;
   setDraftMessage: (message: { to: string; subject: string; body: string } | null) => void;
   clearDraftMessage: () => void;
+  resetState: () => void;
   // Data getters
   getReservationById: (id: string) => Reservation | undefined;
   getRoomByNumber: (number: number) => Room | undefined;
@@ -597,6 +602,10 @@ export function HotelProvider({ children }: { children: ReactNode }) {
     dispatch({ type: "CLEAR_DRAFT_MESSAGE" });
   }, []);
 
+  const resetState = useCallback(() => {
+    dispatch({ type: "RESET_STATE" });
+  }, []);
+
   // Data getters
   const getReservationById = useCallback(
     (id: string) => state.reservations.find(r => r.id === id),
@@ -668,6 +677,7 @@ export function HotelProvider({ children }: { children: ReactNode }) {
     clearKeyGenerationData,
     setDraftMessage,
     clearDraftMessage,
+    resetState,
     getReservationById,
     getRoomByNumber,
     getBillingForReservation,

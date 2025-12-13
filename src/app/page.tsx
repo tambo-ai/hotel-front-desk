@@ -2,6 +2,7 @@
 
 import { Dashboard } from "@/components/hotel/Dashboard";
 import { MessageThreadCollapsible } from "@/components/tambo/message-thread-collapsible";
+import { ResetButton } from "@/components/hotel/ResetButton";
 import { HotelProvider } from "@/lib/hotel-store";
 import { components, tools } from "@/lib/tambo";
 import { TamboProvider } from "@tambo-ai/react";
@@ -20,6 +21,7 @@ export default function Home() {
           contextKey="hotel-front-desk"
           defaultOpen={false}
         />
+        <ResetButton />
       </HotelProvider>
     </TamboProvider>
   );
