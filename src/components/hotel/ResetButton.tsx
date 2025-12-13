@@ -46,10 +46,10 @@ export function ResetButton() {
 
   return (
     <>
-      {/* Subtle reset button in bottom-left corner */}
+      {/* Subtle reset button - bottom-left but above Next.js dev tools */}
       <button
         onClick={() => setShowConfirm(true)}
-        className="fixed bottom-4 left-4 p-2 text-slate-600 hover:text-slate-400 hover:bg-slate-800/50 rounded-lg transition-colors opacity-50 hover:opacity-100 z-40"
+        className="fixed bottom-16 left-4 p-2 text-slate-600 hover:text-slate-400 hover:bg-slate-800/50 rounded-lg transition-colors opacity-40 hover:opacity-100 z-40"
         title="Reset Demo"
       >
         <RotateCcw className="w-4 h-4" />
