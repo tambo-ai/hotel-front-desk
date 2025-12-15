@@ -296,7 +296,9 @@ const Field: React.FC<FieldProps> = (props) => {
  * (one field that is boolean or enum)
  */
 function isSingleEntryMode(request: TamboElicitationRequest): boolean {
-  const reqSchema = request.requestedSchema as { properties?: Record<string, FieldSchema> };
+  const reqSchema = request.requestedSchema as {
+    properties?: Record<string, FieldSchema>;
+  };
   if (!reqSchema.properties) return false;
   const fields = Object.entries(reqSchema.properties);
 
@@ -454,7 +456,7 @@ export interface ElicitationUIProps {
  */
 type RequestedSchemaType = {
   properties: Record<string, FieldSchema>;
-  required?: string[]
+  required?: string[];
 };
 
 export const ElicitationUI: React.FC<ElicitationUIProps> = ({

@@ -114,9 +114,8 @@ src/
    - Verify AI can properly invoke components and tools
 ```
 
-
-
 <!-- tambo-docs-v1.0 -->
+
 ## Tambo AI Framework
 
 This project uses **Tambo AI** for building AI assistants with generative UI and MCP support.
