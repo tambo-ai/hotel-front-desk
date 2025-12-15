@@ -28,19 +28,44 @@ const CompetitorDataPointSchema = z.object({
 
 // Schema for Tambo component registration
 export const OccupancyChartPropsSchema = z.object({
-  data: z.array(OccupancyDataSchema).optional().describe("Occupancy data to display"),
-  competitorData: z.array(CompetitorDataPointSchema).optional().describe("Competitor rate data for overlay"),
-  historicalData: z.array(OccupancyDataSchema).optional().describe("Historical data for YoY comparison"),
-  showCompetitors: z.boolean().optional().describe("Show competitor rate comparison"),
+  data: z
+    .array(OccupancyDataSchema)
+    .optional()
+    .describe("Occupancy data to display"),
+  competitorData: z
+    .array(CompetitorDataPointSchema)
+    .optional()
+    .describe("Competitor rate data for overlay"),
+  historicalData: z
+    .array(OccupancyDataSchema)
+    .optional()
+    .describe("Historical data for YoY comparison"),
+  showCompetitors: z
+    .boolean()
+    .optional()
+    .describe("Show competitor rate comparison"),
   showHistorical: z.boolean().optional().describe("Show historical comparison"),
-  chartType: z.enum(["line", "bar", "composed"]).optional().describe("Chart type"),
-  dateRange: z.enum(["week", "month", "custom"]).optional().describe("Date range to show"),
+  chartType: z
+    .enum(["line", "bar", "composed"])
+    .optional()
+    .describe("Chart type"),
+  dateRange: z
+    .enum(["week", "month", "custom"])
+    .optional()
+    .describe("Date range to show"),
   compact: z.boolean().optional().describe("Compact mode for chat embedding"),
-  onDataPointClick: z.function().args(z.object({
-    date: z.string(),
-    occupancyRate: z.number(),
-    revenue: z.number(),
-  })).returns(z.void()).optional().describe("Callback when a data point is clicked"),
+  onDataPointClick: z
+    .function()
+    .args(
+      z.object({
+        date: z.string(),
+        occupancyRate: z.number(),
+        revenue: z.number(),
+      }),
+    )
+    .returns(z.void())
+    .optional()
+    .describe("Callback when a data point is clicked"),
 });
 
 export type OccupancyChartProps = z.infer<typeof OccupancyChartPropsSchema>;
@@ -80,8 +105,14 @@ export function OccupancyChart({
   // Merge historical data if needed
   let mergedData = chartData.map((d) => ({
     ...d,
-    dayLabel: new Date(d.date).toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" }),
-    shortLabel: new Date(d.date).toLocaleDateString("en-US", { weekday: "short" }),
+    dayLabel: new Date(d.date).toLocaleDateString("en-US", {
+      weekday: "short",
+      month: "short",
+      day: "numeric",
+    }),
+    shortLabel: new Date(d.date).toLocaleDateString("en-US", {
+      weekday: "short",
+    }),
   }));
 
   // Use provided historical data or fall back to default mock data
@@ -116,7 +147,11 @@ export function OccupancyChart({
   }
 
   // Click handler for data points
-  const handleDataPointClick = (data: { date: string; occupancyRate: number; revenue: number }) => {
+  const handleDataPointClick = (data: {
+    date: string;
+    occupancyRate: number;
+    revenue: number;
+  }) => {
     if (onDataPointClick) {
       onDataPointClick(data);
     }
@@ -124,19 +159,21 @@ export function OccupancyChart({
 
   // Calculate summary stats
   const avgOccupancy = Math.round(
-    mergedData.reduce((sum, d) => sum + d.occupancyRate, 0) / mergedData.length
+    mergedData.reduce((sum, d) => sum + d.occupancyRate, 0) / mergedData.length,
   );
   const totalRevenue = mergedData.reduce((sum, d) => sum + d.revenue, 0);
 
   if (compact) {
     return (
-      <div className="bg-slate-800 rounded-lg p-3">
+      <div className="bg-card border border-border rounded-lg p-3">
         <div className="flex items-center justify-between mb-2">
-          <h3 className="text-sm font-medium text-white flex items-center gap-2">
+          <h3 className="text-sm font-medium text-foreground flex items-center gap-2">
             <TrendingUp className="w-4 h-4 text-emerald-400" />
             Occupancy
           </h3>
-          <span className="text-lg font-bold text-white">{avgOccupancy}%</span>
+          <span className="text-lg font-bold text-foreground">
+            {avgOccupancy}%
+          </span>
         </div>
         <div className="h-32">
           <ResponsiveContainer width="100%" height="100%">
@@ -161,7 +198,7 @@ export function OccupancyChart({
             </LineChart>
           </ResponsiveContainer>
         </div>
-        <div className="flex justify-between text-xs text-slate-400 mt-1">
+        <div className="flex justify-between text-xs text-muted-foreground mt-1">
           <span>Avg: {avgOccupancy}%</span>
           <span>Revenue: ${totalRevenue.toLocaleString()}</span>
         </div>
@@ -173,21 +210,39 @@ export function OccupancyChart({
     if (chartType === "bar") {
       return (
         <BarChart data={mergedData}>
-          <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-          <XAxis dataKey="shortLabel" stroke="#9ca3af" fontSize={12} />
-          <YAxis stroke="#9ca3af" fontSize={12} domain={[0, 100]} />
+          <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+          <XAxis
+            dataKey="shortLabel"
+            stroke="var(--muted-foreground)"
+            fontSize={12}
+          />
+          <YAxis
+            stroke="var(--muted-foreground)"
+            fontSize={12}
+            domain={[0, 100]}
+          />
           <Tooltip
             contentStyle={{
-              backgroundColor: "#1e293b",
-              border: "1px solid #374151",
+              backgroundColor: "var(--card)",
+              border: "1px solid var(--border)",
               borderRadius: "8px",
             }}
-            labelStyle={{ color: "#fff" }}
+            labelStyle={{ color: "var(--foreground)" }}
           />
           <Legend />
-          <Bar dataKey="occupancyRate" name="Occupancy %" fill="#10b981" radius={[4, 4, 0, 0]} />
+          <Bar
+            dataKey="occupancyRate"
+            name="Occupancy %"
+            fill="#10b981"
+            radius={[4, 4, 0, 0]}
+          />
           {showHistorical && (
-            <Bar dataKey="historicalOccupancy" name="Last Year %" fill="#6b7280" radius={[4, 4, 0, 0]} />
+            <Bar
+              dataKey="historicalOccupancy"
+              name="Last Year %"
+              fill="#6b7280"
+              radius={[4, 4, 0, 0]}
+            />
           )}
         </BarChart>
       );
@@ -196,21 +251,48 @@ export function OccupancyChart({
     if (chartType === "composed") {
       return (
         <ComposedChart data={mergedData}>
-          <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-          <XAxis dataKey="shortLabel" stroke="#9ca3af" fontSize={12} />
-          <YAxis yAxisId="left" stroke="#9ca3af" fontSize={12} domain={[0, 100]} />
-          <YAxis yAxisId="right" orientation="right" stroke="#9ca3af" fontSize={12} />
+          <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+          <XAxis
+            dataKey="shortLabel"
+            stroke="var(--muted-foreground)"
+            fontSize={12}
+          />
+          <YAxis
+            yAxisId="left"
+            stroke="var(--muted-foreground)"
+            fontSize={12}
+            domain={[0, 100]}
+          />
+          <YAxis
+            yAxisId="right"
+            orientation="right"
+            stroke="var(--muted-foreground)"
+            fontSize={12}
+          />
           <Tooltip
             contentStyle={{
-              backgroundColor: "#1e293b",
-              border: "1px solid #374151",
+              backgroundColor: "var(--card)",
+              border: "1px solid var(--border)",
               borderRadius: "8px",
             }}
-            labelStyle={{ color: "#fff" }}
+            labelStyle={{ color: "var(--foreground)" }}
           />
           <Legend />
-          <Bar yAxisId="right" dataKey="revenue" name="Revenue $" fill="#3b82f6" radius={[4, 4, 0, 0]} />
-          <Line yAxisId="left" type="monotone" dataKey="occupancyRate" name="Occupancy %" stroke="#10b981" strokeWidth={2} />
+          <Bar
+            yAxisId="right"
+            dataKey="revenue"
+            name="Revenue $"
+            fill="#3b82f6"
+            radius={[4, 4, 0, 0]}
+          />
+          <Line
+            yAxisId="left"
+            type="monotone"
+            dataKey="occupancyRate"
+            name="Occupancy %"
+            stroke="#10b981"
+            strokeWidth={2}
+          />
           {showHistorical && (
             <Line
               yAxisId="left"
@@ -231,7 +313,11 @@ export function OccupancyChart({
       <LineChart
         data={mergedData}
         onClick={(e) => {
-          const event = e as { activePayload?: Array<{ payload: { date: string; occupancyRate: number; revenue: number } }> };
+          const event = e as {
+            activePayload?: Array<{
+              payload: { date: string; occupancyRate: number; revenue: number };
+            }>;
+          };
           if (event?.activePayload?.[0]) {
             const payload = event.activePayload[0].payload;
             handleDataPointClick({
@@ -242,22 +328,31 @@ export function OccupancyChart({
           }
         }}
       >
-        <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-        <XAxis dataKey="shortLabel" stroke="#9ca3af" fontSize={12} />
-        <YAxis stroke="#9ca3af" fontSize={12} domain={[0, 100]} />
+        <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+        <XAxis
+          dataKey="shortLabel"
+          stroke="var(--muted-foreground)"
+          fontSize={12}
+        />
+        <YAxis
+          stroke="var(--muted-foreground)"
+          fontSize={12}
+          domain={[0, 100]}
+        />
         <Tooltip
           contentStyle={{
-            backgroundColor: "#1e293b",
-            border: "1px solid #374151",
+            backgroundColor: "var(--card)",
+            border: "1px solid var(--border)",
             borderRadius: "8px",
           }}
-          labelStyle={{ color: "#fff" }}
+          labelStyle={{ color: "var(--foreground)" }}
           formatter={(value: number | undefined, name: string | undefined) => {
             const v = value ?? 0;
             const n = name ?? "";
             if (n === "occupancyRate") return [`${v}%`, "Current"];
             if (n === "historicalOccupancy") return [`${v}%`, "Last Year"];
-            if (n.startsWith("competitor")) return [`${v}%`, n.replace("competitor", "Competitor ")];
+            if (n.startsWith("competitor"))
+              return [`${v}%`, n.replace("competitor", "Competitor ")];
             return [`${v}%`, n];
           }}
         />
@@ -268,7 +363,11 @@ export function OccupancyChart({
           name="Occupancy %"
           stroke="#10b981"
           strokeWidth={2}
-          dot={{ fill: "#10b981", strokeWidth: 2, cursor: onDataPointClick ? "pointer" : "default" }}
+          dot={{
+            fill: "#10b981",
+            strokeWidth: 2,
+            cursor: onDataPointClick ? "pointer" : "default",
+          }}
           activeDot={{ r: 6, cursor: onDataPointClick ? "pointer" : "default" }}
         />
         {showHistorical && (
@@ -318,21 +417,25 @@ export function OccupancyChart({
   };
 
   return (
-    <div className="bg-slate-800 rounded-lg overflow-hidden">
-      <div className="p-4 border-b border-slate-700">
+    <div className="bg-card border border-border rounded-lg overflow-hidden">
+      <div className="p-4 border-b border-border">
         <div className="flex items-center justify-between">
-          <h3 className="text-lg font-semibold text-white flex items-center gap-2">
+          <h3 className="text-lg font-semibold text-foreground flex items-center gap-2">
             <TrendingUp className="w-5 h-5 text-emerald-400" />
             Occupancy Trends
           </h3>
           <div className="flex gap-4 text-sm">
             <div>
-              <span className="text-slate-400">Avg: </span>
-              <span className="text-white font-medium">{avgOccupancy}%</span>
+              <span className="text-muted-foreground">Avg: </span>
+              <span className="text-foreground font-medium">
+                {avgOccupancy}%
+              </span>
             </div>
             <div>
-              <span className="text-slate-400">Revenue: </span>
-              <span className="text-emerald-400 font-medium">${totalRevenue.toLocaleString()}</span>
+              <span className="text-muted-foreground">Revenue: </span>
+              <span className="text-emerald-400 font-medium">
+                ${totalRevenue.toLocaleString()}
+              </span>
             </div>
           </div>
         </div>
@@ -352,19 +455,27 @@ export function OccupancyChart({
           {mergedData.slice(-7).map((d) => (
             <button
               key={d.date}
-              onClick={() => handleDataPointClick({ date: d.date, occupancyRate: d.occupancyRate, revenue: d.revenue })}
+              onClick={() =>
+                handleDataPointClick({
+                  date: d.date,
+                  occupancyRate: d.occupancyRate,
+                  revenue: d.revenue,
+                })
+              }
               className={`text-center p-1 rounded transition-colors ${
-                onDataPointClick ? "hover:bg-slate-700 cursor-pointer" : ""
+                onDataPointClick ? "hover:bg-secondary cursor-pointer" : ""
               }`}
             >
-              <div className="text-xs text-slate-500">{d.shortLabel}</div>
+              <div className="text-xs text-muted-foreground">
+                {d.shortLabel}
+              </div>
               <div
                 className={`text-sm font-medium ${
                   d.occupancyRate >= 80
                     ? "text-emerald-400"
                     : d.occupancyRate >= 60
-                    ? "text-amber-400"
-                    : "text-red-400"
+                      ? "text-amber-400"
+                      : "text-red-400"
                 }`}
               >
                 {d.occupancyRate}%

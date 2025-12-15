@@ -12,13 +12,18 @@ export const GuestMessageComposerPropsSchema = z.object({
   subject: z.string().describe("Email subject line"),
   body: z.string().describe("Email body content"),
   guestId: z.string().optional().describe("Guest ID for profile context"),
-  template: z.enum(["welcome", "apology", "confirmation", "thank_you", "custom"]).optional().describe("Message template type"),
+  template: z
+    .enum(["welcome", "apology", "confirmation", "thank_you", "custom"])
+    .optional()
+    .describe("Message template type"),
   compact: z.boolean().optional().describe("Compact mode for chat embedding"),
   onSend: z.function().args().returns(z.void()).optional(),
   onClose: z.function().args().returns(z.void()).optional(),
 });
 
-export type GuestMessageComposerProps = z.infer<typeof GuestMessageComposerPropsSchema>;
+export type GuestMessageComposerProps = z.infer<
+  typeof GuestMessageComposerPropsSchema
+>;
 
 export function GuestMessageComposer({
   to: initialTo,
@@ -66,21 +71,25 @@ export function GuestMessageComposer({
 
   if (sent) {
     return (
-      <div className="bg-slate-800 rounded-lg p-6 text-center">
+      <div className="bg-card border border-border rounded-lg p-6 text-center">
         <div className="w-16 h-16 rounded-full bg-emerald-500/20 flex items-center justify-center mx-auto mb-4">
           <Send className="w-8 h-8 text-emerald-400" />
         </div>
-        <h3 className="text-lg font-semibold text-white mb-2">Message Sent!</h3>
-        <p className="text-slate-400">Your message has been sent to {to}</p>
+        <h3 className="text-lg font-semibold text-foreground mb-2">
+          Message Sent!
+        </h3>
+        <p className="text-muted-foreground">
+          Your message has been sent to {to}
+        </p>
       </div>
     );
   }
 
   if (compact) {
     return (
-      <div className="bg-slate-800 rounded-lg p-3">
+      <div className="bg-card border border-border rounded-lg p-3">
         <div className="flex items-center justify-between mb-2">
-          <h3 className="text-sm font-medium text-white flex items-center gap-2">
+          <h3 className="text-sm font-medium text-foreground flex items-center gap-2">
             <Mail className="w-4 h-4 text-blue-400" />
             Draft Message
           </h3>
@@ -92,22 +101,26 @@ export function GuestMessageComposer({
         </div>
         <div className="space-y-2 text-sm">
           <div>
-            <span className="text-slate-500">To: </span>
-            <span className="text-white">{to}</span>
+            <span className="text-muted-foreground">To: </span>
+            <span className="text-foreground">{to}</span>
           </div>
           <div>
-            <span className="text-slate-500">Subject: </span>
-            <span className="text-white">{subject}</span>
+            <span className="text-muted-foreground">Subject: </span>
+            <span className="text-foreground">{subject}</span>
           </div>
-          <div className="text-slate-400 text-xs line-clamp-2">{body}</div>
+          <div className="text-muted-foreground text-xs line-clamp-2">
+            {body}
+          </div>
         </div>
         <div className="mt-3 flex gap-2">
           <button
             onClick={handleSend}
             disabled={isSending}
-            className="flex-1 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-600 text-white text-sm rounded transition-colors flex items-center justify-center gap-1"
+            className="flex-1 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 disabled:bg-muted text-foreground text-sm rounded transition-colors flex items-center justify-center gap-1"
           >
-            {isSending ? "Sending..." : (
+            {isSending ? (
+              "Sending..."
+            ) : (
               <>
                 <Send className="w-3 h-3" />
                 Send
@@ -120,15 +133,17 @@ export function GuestMessageComposer({
   }
 
   return (
-    <div className="bg-slate-800 rounded-lg overflow-hidden">
+    <div className="bg-card border border-border rounded-lg overflow-hidden">
       {/* Header */}
-      <div className="p-4 border-b border-slate-700 flex items-center justify-between">
+      <div className="p-4 border-b border-border flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center">
-            <Mail className="w-5 h-5 text-white" />
+            <Mail className="w-5 h-5 text-foreground" />
           </div>
           <div>
-            <h3 className="text-lg font-semibold text-white">Compose Message</h3>
+            <h3 className="text-lg font-semibold text-foreground">
+              Compose Message
+            </h3>
             {template && (
               <span className="text-xs px-2 py-0.5 bg-blue-500/20 text-blue-400 rounded">
                 {template} template
@@ -139,26 +154,30 @@ export function GuestMessageComposer({
         {onClose && (
           <button
             onClick={handleClose}
-            className="p-2 hover:bg-slate-700 rounded-lg transition-colors"
+            className="p-2 hover:bg-secondary rounded-lg transition-colors"
           >
-            <X className="w-5 h-5 text-slate-400" />
+            <X className="w-5 h-5 text-muted-foreground" />
           </button>
         )}
       </div>
 
       {/* Guest Context */}
       {guest && (
-        <div className="px-4 py-3 bg-slate-700/30 border-b border-slate-700">
+        <div className="px-4 py-3 bg-secondary/50 border-b border-border">
           <div className="flex items-center gap-3">
-            <User className="w-4 h-4 text-slate-500" />
-            <span className="text-sm text-slate-300">
+            <User className="w-4 h-4 text-muted-foreground" />
+            <span className="text-sm text-foreground">
               {guest.firstName} {guest.lastName}
             </span>
-            <span className={`text-xs px-2 py-0.5 rounded ${
-              guest.loyaltyTier === "Platinum" ? "bg-purple-500/20 text-purple-400" :
-              guest.loyaltyTier === "Gold" ? "bg-amber-500/20 text-amber-400" :
-              "bg-slate-600 text-slate-300"
-            }`}>
+            <span
+              className={`text-xs px-2 py-0.5 rounded ${
+                guest.loyaltyTier === "Platinum"
+                  ? "bg-purple-500/20 text-purple-400"
+                  : guest.loyaltyTier === "Gold"
+                    ? "bg-amber-500/20 text-amber-400"
+                    : "bg-muted text-foreground"
+              }`}
+            >
               {guest.loyaltyTier}
             </span>
           </div>
@@ -169,50 +188,56 @@ export function GuestMessageComposer({
       <div className="p-4 space-y-4">
         {/* To */}
         <div>
-          <label className="block text-sm font-medium text-slate-400 mb-1">To</label>
+          <label className="block text-sm font-medium text-muted-foreground mb-1">
+            To
+          </label>
           <input
             type="email"
             value={to}
             onChange={(e) => setTo(e.target.value)}
-            className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full px-3 py-2 bg-secondary border border-border rounded-lg text-foreground focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           />
         </div>
 
         {/* Subject */}
         <div>
-          <label className="block text-sm font-medium text-slate-400 mb-1">Subject</label>
+          <label className="block text-sm font-medium text-muted-foreground mb-1">
+            Subject
+          </label>
           <input
             type="text"
             value={subject}
             onChange={(e) => setSubject(e.target.value)}
-            className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full px-3 py-2 bg-secondary border border-border rounded-lg text-foreground focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           />
         </div>
 
         {/* Body */}
         <div>
-          <label className="block text-sm font-medium text-slate-400 mb-1">Message</label>
+          <label className="block text-sm font-medium text-muted-foreground mb-1">
+            Message
+          </label>
           <textarea
             value={body}
             onChange={(e) => setBody(e.target.value)}
             rows={8}
-            className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+            className="w-full px-3 py-2 bg-secondary border border-border rounded-lg text-foreground focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
           />
         </div>
 
         {/* AI indicator */}
-        <div className="flex items-center gap-2 text-xs text-slate-500">
+        <div className="flex items-center gap-2 text-xs text-muted-foreground">
           <Sparkles className="w-3 h-3" />
           <span>This message was drafted by AI based on context</span>
         </div>
       </div>
 
       {/* Actions */}
-      <div className="p-4 border-t border-slate-700 flex items-center justify-end gap-3">
+      <div className="p-4 border-t border-border flex items-center justify-end gap-3">
         {onClose && (
           <button
             onClick={handleClose}
-            className="px-4 py-2 border border-slate-600 text-slate-300 hover:bg-slate-700 rounded-lg transition-colors"
+            className="px-4 py-2 border border-border text-foreground hover:bg-secondary rounded-lg transition-colors"
           >
             Cancel
           </button>
@@ -220,7 +245,7 @@ export function GuestMessageComposer({
         <button
           onClick={handleSend}
           disabled={isSending || !to || !subject || !body}
-          className="px-6 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-600 disabled:cursor-not-allowed text-white rounded-lg transition-colors flex items-center gap-2"
+          className="px-6 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-muted disabled:cursor-not-allowed text-foreground rounded-lg transition-colors flex items-center gap-2"
         >
           {isSending ? (
             "Sending..."

@@ -35,6 +35,27 @@ export type Room = z.infer<typeof RoomSchema>;
 export const LoyaltyTierEnum = z.enum(["Member", "Silver", "Gold", "Platinum"]);
 export type LoyaltyTier = z.infer<typeof LoyaltyTierEnum>;
 
+/**
+ * Loyalty Tier Styling
+ * Centralized styles for loyalty tier badges across all components.
+ * Colors are defined in globals.css as CSS variables (--tier-member, --tier-silver, etc.)
+ */
+export const tierColors: Record<LoyaltyTier, string> = {
+  Member: "bg-tier-member",
+  Silver: "bg-tier-silver",
+  Gold: "bg-tier-gold",
+  Platinum: "bg-tier-platinum",
+};
+
+export const tierBadgeStyles: Record<LoyaltyTier, string> = {
+  Member: "bg-tier-member text-tier-member-foreground",
+  Silver:
+    "bg-gradient-to-r from-tier-silver to-tier-silver/70 text-tier-silver-foreground",
+  Gold: "bg-gradient-to-r from-tier-gold to-tier-gold/70 text-tier-gold-foreground",
+  Platinum:
+    "bg-gradient-to-r from-tier-platinum to-tier-platinum/70 text-tier-platinum-foreground",
+};
+
 export const StayHistoryItemSchema = z.object({
   id: z.string(),
   checkInDate: z.string(),
@@ -130,7 +151,7 @@ export const BillingStatementSchema = z.object({
         itemId: z.string().optional(),
         discountPercent: z.number().optional(),
         reason: z.string().optional(),
-      })
+      }),
     )
     .optional(),
 });
@@ -200,7 +221,8 @@ export type ViewType =
   | "guests"
   | "housekeeping"
   | "reports"
-  | "rates";
+  | "rates"
+  | "settings";
 
 export interface StagedRoomAssignment {
   reservationId: string;
@@ -418,7 +440,7 @@ export const DraftRevenueReportArgsSchema = z.object({
         date: z.string(),
         oldRate: z.number(),
         newRate: z.number(),
-      })
+      }),
     )
     .optional()
     .describe("Rate changes to include in report"),
@@ -437,6 +459,7 @@ export const NavigateToViewArgsSchema = z.object({
       "housekeeping",
       "reports",
       "rates",
+      "settings",
     ])
     .describe("View to navigate to"),
 });

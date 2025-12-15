@@ -21,7 +21,9 @@ export const BillingItemDetailPropsSchema = z.object({
   onClose: z.function().returns(z.void()).optional(),
 });
 
-export type BillingItemDetailProps = z.infer<typeof BillingItemDetailPropsSchema>;
+export type BillingItemDetailProps = z.infer<
+  typeof BillingItemDetailPropsSchema
+>;
 
 const categoryIcons = {
   room: BedDouble,
@@ -74,42 +76,46 @@ export function BillingItemDetail({
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <div className="bg-slate-800 rounded-lg shadow-xl w-full max-w-md mx-4">
+      <div className="bg-card border border-border rounded-lg shadow-xl w-full max-w-md mx-4">
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-slate-700">
-          <h2 className="text-lg font-semibold text-white flex items-center gap-2">
+        <div className="flex items-center justify-between p-4 border-b border-border">
+          <h2 className="text-lg font-semibold text-foreground flex items-center gap-2">
             <Icon className="w-5 h-5 text-blue-400" />
             Billing Item Details
           </h2>
           <button
             onClick={onClose}
-            className="p-1 hover:bg-slate-700 rounded-full transition-colors"
+            className="p-1 hover:bg-secondary rounded-full transition-colors"
           >
-            <X className="w-5 h-5 text-slate-400" />
+            <X className="w-5 h-5 text-muted-foreground" />
           </button>
         </div>
 
         {/* Content */}
         <div className="p-6 space-y-4">
           {/* Item Info */}
-          <div className="bg-slate-700/50 rounded-lg p-4 space-y-3">
+          <div className="bg-secondary/50 rounded-lg p-4 space-y-3">
             <div className="flex justify-between">
-              <span className="text-slate-400">Description</span>
-              <span className="text-white font-medium">{item.description}</span>
+              <span className="text-muted-foreground">Description</span>
+              <span className="text-foreground font-medium">
+                {item.description}
+              </span>
             </div>
             <div className="flex justify-between">
-              <span className="text-slate-400">Category</span>
-              <span className="text-white">{categoryLabel}</span>
+              <span className="text-muted-foreground">Category</span>
+              <span className="text-foreground">{categoryLabel}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-slate-400">Date</span>
-              <span className="text-white">
+              <span className="text-muted-foreground">Date</span>
+              <span className="text-foreground">
                 {new Date(item.date).toLocaleDateString()}
               </span>
             </div>
             <div className="flex justify-between text-lg">
-              <span className="text-slate-400">Amount</span>
-              <span className={`font-bold ${item.isComped ? "text-emerald-400 line-through" : "text-white"}`}>
+              <span className="text-muted-foreground">Amount</span>
+              <span
+                className={`font-bold ${item.isComped ? "text-emerald-400 line-through" : "text-foreground"}`}
+              >
                 ${item.amount.toFixed(2)}
               </span>
             </div>
@@ -128,26 +134,30 @@ export function BillingItemDetail({
               {!showDiscountInput ? (
                 <button
                   onClick={() => setShowDiscountInput(true)}
-                  className="w-full px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
+                  className="w-full px-4 py-2 bg-secondary hover:bg-muted text-foreground rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
                 >
                   <Percent className="w-4 h-4" />
                   Apply Discount
                 </button>
               ) : (
-                <div className="bg-slate-700/50 rounded-lg p-4 space-y-3">
+                <div className="bg-secondary/50 rounded-lg p-4 space-y-3">
                   <div className="flex items-center gap-3">
-                    <label className="text-slate-400 text-sm">Discount %</label>
+                    <label className="text-muted-foreground text-sm">
+                      Discount %
+                    </label>
                     <input
                       type="number"
                       min="1"
                       max="100"
                       value={discountPercent}
-                      onChange={(e) => setDiscountPercent(parseInt(e.target.value) || 0)}
-                      className="flex-1 px-3 py-2 bg-slate-600 text-white rounded-lg text-center"
+                      onChange={(e) =>
+                        setDiscountPercent(parseInt(e.target.value) || 0)
+                      }
+                      className="flex-1 px-3 py-2 bg-muted text-foreground rounded-lg text-center"
                     />
                   </div>
                   <div className="flex justify-between text-sm">
-                    <span className="text-slate-400">New Amount</span>
+                    <span className="text-muted-foreground">New Amount</span>
                     <span className="text-emerald-400 font-medium">
                       ${discountedAmount.toFixed(2)}
                     </span>
@@ -155,7 +165,7 @@ export function BillingItemDetail({
                   <div className="flex gap-2">
                     <button
                       onClick={() => setShowDiscountInput(false)}
-                      className="flex-1 px-3 py-2 bg-slate-600 hover:bg-slate-500 text-white rounded-lg text-sm"
+                      className="flex-1 px-3 py-2 bg-muted hover:bg-secondary text-foreground rounded-lg text-sm"
                     >
                       Cancel
                     </button>
@@ -173,10 +183,10 @@ export function BillingItemDetail({
         </div>
 
         {/* Footer */}
-        <div className="p-4 border-t border-slate-700 flex gap-3">
+        <div className="p-4 border-t border-border flex gap-3">
           <button
             onClick={onClose}
-            className="flex-1 px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg font-medium transition-colors"
+            className="flex-1 px-4 py-2 bg-secondary hover:bg-muted text-foreground rounded-lg font-medium transition-colors"
           >
             Close
           </button>

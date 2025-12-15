@@ -58,8 +58,7 @@ const useMessageSuggestionsContext = () => {
  * Props for the MessageSuggestions component.
  * Extends standard HTMLDivElement attributes.
  */
-export interface MessageSuggestionsProps
-  extends React.HTMLAttributes<HTMLDivElement> {
+export interface MessageSuggestionsProps extends React.HTMLAttributes<HTMLDivElement> {
   /** Maximum number of suggestions to display (default: 3) */
   maxSuggestions?: number;
   /** The child elements to render within the container. */
@@ -316,7 +315,7 @@ const MessageSuggestionsList = React.forwardRef<
     <div
       ref={ref}
       className={cn(
-        "flex space-x-2 overflow-x-auto pb-2 rounded-md bg-transparent min-h-[2.5rem]",
+        "flex flex-wrap gap-2 pb-2 bg-transparent min-h-[2.5rem]",
         isGenerating ? "opacity-70" : "",
         className,
       )}
@@ -336,13 +335,13 @@ const MessageSuggestionsList = React.forwardRef<
             >
               <button
                 className={cn(
-                  "py-2 px-2.5 rounded-2xl text-xs transition-colors",
-                  "border border-flat",
+                  "py-2 px-3 rounded-xl text-xs transition-all duration-200",
+                  "border",
                   isGenerating
-                    ? "bg-muted/50 text-muted-foreground"
+                    ? "bg-muted/50 text-muted-foreground border-border"
                     : selectedSuggestionId === suggestion.id
-                      ? "bg-accent text-accent-foreground"
-                      : "bg-background hover:bg-accent hover:text-accent-foreground",
+                      ? "bg-accent text-accent-foreground border-accent"
+                      : "bg-card text-foreground border-border hover:border-accent hover:bg-accent/10",
                 )}
                 onClick={async () =>
                   !isGenerating && (await accept({ suggestion }))
@@ -359,7 +358,7 @@ const MessageSuggestionsList = React.forwardRef<
           placeholders.map((_, index) => (
             <div
               key={`placeholder-${index}`}
-              className="py-2 px-2.5 rounded-2xl text-xs border border-flat bg-muted/20 text-transparent animate-pulse"
+              className="py-2 px-3 rounded-xl text-xs border border-border bg-muted/30 text-transparent animate-pulse"
               data-placeholder-index={index}
             >
               <span className="invisible">Placeholder</span>

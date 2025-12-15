@@ -29,9 +29,11 @@ const messageVariants = cva("flex", {
     variant: {
       default: "",
       solid: [
-        "[&>div>div:first-child]:shadow-md",
-        "[&>div>div:first-child]:bg-container/50",
-        "[&>div>div:first-child]:hover:bg-container",
+        "[&>div>div:first-child]:shadow-sm",
+        "[&>div>div:first-child]:bg-card",
+        "[&>div>div:first-child]:border",
+        "[&>div>div:first-child]:border-border",
+        "[&>div>div:first-child]:hover:border-border/60",
         "[&>div>div:first-child]:transition-all",
         "[&>div>div:first-child]:duration-200",
       ].join(" "),
@@ -95,8 +97,10 @@ export function getToolCallRequest(
  * Props for the Message component.
  * Extends standard HTMLDivElement attributes.
  */
-export interface MessageProps
-  extends Omit<React.HTMLAttributes<HTMLDivElement>, "content"> {
+export interface MessageProps extends Omit<
+  React.HTMLAttributes<HTMLDivElement>,
+  "content"
+> {
   /** The role of the message sender ('user' or 'assistant'). */
   role: "user" | "assistant";
   /** The full Tambo thread message object. */
@@ -169,10 +173,10 @@ const LoadingIndicator: React.FC<React.HTMLAttributes<HTMLDivElement>> = ({
   ...props
 }) => {
   return (
-    <div className={cn("flex items-center gap-1", className)} {...props}>
-      <span className="w-1 h-1 bg-current rounded-full animate-bounce [animation-delay:-0.3s]"></span>
-      <span className="w-1 h-1 bg-current rounded-full animate-bounce [animation-delay:-0.2s]"></span>
-      <span className="w-1 h-1 bg-current rounded-full animate-bounce [animation-delay:-0.1s]"></span>
+    <div className={cn("flex items-center gap-1.5", className)} {...props}>
+      <span className="w-1.5 h-1.5 bg-muted-foreground/60 rounded-full animate-bounce [animation-delay:-0.3s]"></span>
+      <span className="w-1.5 h-1.5 bg-muted-foreground/60 rounded-full animate-bounce [animation-delay:-0.2s]"></span>
+      <span className="w-1.5 h-1.5 bg-muted-foreground/60 rounded-full animate-bounce [animation-delay:-0.1s]"></span>
     </div>
   );
 };
@@ -228,8 +232,10 @@ MessageImages.displayName = "MessageImages";
  * Props for the MessageContent component.
  * Extends standard HTMLDivElement attributes.
  */
-export interface MessageContentProps
-  extends Omit<React.HTMLAttributes<HTMLDivElement>, "content"> {
+export interface MessageContentProps extends Omit<
+  React.HTMLAttributes<HTMLDivElement>,
+  "content"
+> {
   /** Optional override for the message content. If not provided, uses the content from the message object in the context. */
   content?: string | { type: string; text?: string }[];
   /** Optional flag to render as Markdown. Default is true. */
@@ -264,7 +270,7 @@ const MessageContent = React.forwardRef<HTMLDivElement, MessageContentProps>(
       <div
         ref={ref}
         className={cn(
-          "relative block rounded-3xl px-4 py-2 text-[15px] leading-relaxed transition-all duration-200 font-medium max-w-full [&_p]:py-1 [&_li]:list-item",
+          "relative block rounded-xl px-4 py-3 text-sm leading-relaxed transition-all duration-200 max-w-full [&_p]:py-1 [&_li]:list-item",
           className,
         )}
         data-slot="message-content"
@@ -310,8 +316,10 @@ MessageContent.displayName = "MessageContent";
  * Props for the ToolcallInfo component.
  * Extends standard HTMLDivElement attributes.
  */
-export interface ToolcallInfoProps
-  extends Omit<React.HTMLAttributes<HTMLDivElement>, "content"> {
+export interface ToolcallInfoProps extends Omit<
+  React.HTMLAttributes<HTMLDivElement>,
+  "content"
+> {
   /** Optional flag to render response content as Markdown. Default is true. */
   markdown?: boolean;
 }
@@ -380,7 +388,7 @@ const ToolcallInfo = React.forwardRef<HTMLDivElement, ToolcallInfoProps>(
       <div
         ref={ref}
         className={cn(
-          "flex flex-col items-start text-xs opacity-50",
+          "flex flex-col items-start text-xs text-muted-foreground mt-2",
           className,
         )}
         data-slot="toolcall-info"
@@ -393,20 +401,20 @@ const ToolcallInfo = React.forwardRef<HTMLDivElement, ToolcallInfoProps>(
             aria-controls={toolDetailsId}
             onClick={() => setIsExpanded(!isExpanded)}
             className={cn(
-              "flex items-center gap-1 cursor-pointer hover:bg-gray-100 rounded-md p-1 select-none w-fit",
+              "flex items-center gap-1.5 cursor-pointer hover:bg-muted rounded-lg px-2 py-1.5 select-none w-fit transition-colors",
             )}
           >
             {hasToolError ? (
-              <X className="w-3 h-3 text-bold text-red-500" />
+              <X className="w-3.5 h-3.5 text-destructive" />
             ) : isLoading ? (
-              <Loader2 className="w-3 h-3 text-muted-foreground text-bold animate-spin" />
+              <Loader2 className="w-3.5 h-3.5 text-accent animate-spin" />
             ) : (
-              <Check className="w-3 h-3 text-bold text-green-500" />
+              <Check className="w-3.5 h-3.5 text-emerald-500" />
             )}
-            <span>{toolStatusMessage}</span>
+            <span className="font-medium">{toolStatusMessage}</span>
             <ChevronDown
               className={cn(
-                "w-3 h-3 transition-transform duration-200",
+                "w-3.5 h-3.5 transition-transform duration-200",
                 !isExpanded && "-rotate-90",
               )}
             />
@@ -414,22 +422,29 @@ const ToolcallInfo = React.forwardRef<HTMLDivElement, ToolcallInfoProps>(
           <div
             id={toolDetailsId}
             className={cn(
-              "flex flex-col gap-1 p-3 pl-7 overflow-auto transition-[max-height,opacity,padding] duration-300 w-full truncate",
-              isExpanded ? "max-h-auto opacity-100" : "max-h-0 opacity-0 p-0",
+              "flex flex-col gap-2 overflow-auto transition-[max-height,opacity,padding] duration-300 w-full",
+              isExpanded
+                ? "max-h-auto opacity-100 mt-2 ml-2 p-3 bg-muted/50 rounded-lg border border-border"
+                : "max-h-0 opacity-0 p-0",
             )}
           >
-            <span className="whitespace-pre-wrap pl-2">
-              tool: {toolCallRequest?.toolName}
-            </span>
-            <span className="whitespace-pre-wrap pl-2">
-              parameters:{"\n"}
-              {stringify(keyifyParameters(toolCallRequest?.parameters))}
-            </span>
+            <div className="font-mono text-xs">
+              <span className="text-muted-foreground">tool:</span>{" "}
+              <span className="text-foreground">
+                {toolCallRequest?.toolName}
+              </span>
+            </div>
+            <div className="font-mono text-xs">
+              <span className="text-muted-foreground">parameters:</span>
+              <pre className="mt-1 text-foreground whitespace-pre-wrap">
+                {stringify(keyifyParameters(toolCallRequest?.parameters))}
+              </pre>
+            </div>
             <SamplingSubThread parentMessageId={message.id} />
             {associatedToolResponse && (
-              <div className="pl-2">
-                <span className="whitespace-pre-wrap">result:</span>
-                <div>
+              <div className="font-mono text-xs">
+                <span className="text-muted-foreground">result:</span>
+                <div className="mt-1">
                   {!associatedToolResponse.content ? (
                     <span className="text-muted-foreground italic">
                       Empty response
@@ -474,20 +489,20 @@ const SamplingSubThread = ({
   if (!childMessages?.length) return null;
 
   return (
-    <div className="flex flex-col gap-1">
+    <div className="flex flex-col gap-1 mt-2">
       <button
         type="button"
         aria-expanded={isExpanded}
         aria-controls={samplingDetailsId}
         onClick={() => setIsExpanded(!isExpanded)}
         className={cn(
-          "flex items-center gap-1 cursor-pointer hover:bg-muted-foreground/10 rounded-md p-2 select-none w-fit",
+          "flex items-center gap-1.5 cursor-pointer hover:bg-muted rounded-lg px-2 py-1.5 select-none w-fit transition-colors",
         )}
       >
-        <span>{titleText}</span>
+        <span className="font-medium">{titleText}</span>
         <ChevronDown
           className={cn(
-            "w-3 h-3 transition-transform duration-200",
+            "w-3.5 h-3.5 transition-transform duration-200",
             !isExpanded && "-rotate-90",
           )}
         />
@@ -502,15 +517,15 @@ const SamplingSubThread = ({
         )}
         aria-hidden={!isExpanded}
       >
-        <div className="pl-2">
-          <div className="border-l-2 border-muted-foreground p-2 flex flex-col gap-4">
+        <div className="ml-2 mt-1">
+          <div className="border-l-2 border-border pl-3 py-1 flex flex-col gap-3">
             {childMessages?.map((m: TamboThreadMessage) => (
               <div key={m.id} className={`${m.role === "user" && "pl-2"}`}>
                 <span
                   className={cn(
-                    "whitespace-pre-wrap",
+                    "whitespace-pre-wrap text-sm",
                     m.role === "assistant" &&
-                      "bg-muted/50 rounded-md p-2 inline-block w-fit",
+                      "bg-card rounded-lg p-3 inline-block w-fit border border-border",
                   )}
                 >
                   {getSafeContent(m.content)}
@@ -585,7 +600,7 @@ const ReasoningInfo = React.forwardRef<HTMLDivElement, ReasoningInfoProps>(
       <div
         ref={ref}
         className={cn(
-          "flex flex-col items-start text-xs opacity-50",
+          "flex flex-col items-start text-xs text-muted-foreground mb-2",
           className,
         )}
         data-slot="reasoning-info"
@@ -598,10 +613,15 @@ const ReasoningInfo = React.forwardRef<HTMLDivElement, ReasoningInfoProps>(
             aria-controls={reasoningDetailsId}
             onClick={() => setIsExpanded(!isExpanded)}
             className={cn(
-              "flex items-center gap-1 cursor-pointer hover:bg-muted-foreground/10 rounded-md px-3 py-1 select-none w-fit",
+              "flex items-center gap-1.5 cursor-pointer hover:bg-muted rounded-lg px-2 py-1.5 select-none w-fit transition-colors",
             )}
           >
-            <span className={isLoading ? "animate-thinking-gradient" : ""}>
+            <span
+              className={cn(
+                "font-medium",
+                isLoading && "animate-thinking-gradient",
+              )}
+            >
               {isLoading
                 ? "Thinking "
                 : message.reasoningDurationMS
@@ -613,7 +633,7 @@ const ReasoningInfo = React.forwardRef<HTMLDivElement, ReasoningInfoProps>(
             </span>
             <ChevronDown
               className={cn(
-                "w-3 h-3 transition-transform duration-200",
+                "w-3.5 h-3.5 transition-transform duration-200",
                 !isExpanded && "-rotate-90",
               )}
             />
@@ -622,20 +642,22 @@ const ReasoningInfo = React.forwardRef<HTMLDivElement, ReasoningInfoProps>(
             ref={scrollContainerRef}
             id={reasoningDetailsId}
             className={cn(
-              "flex flex-col gap-1 px-3 py-3 overflow-auto transition-[max-height,opacity,padding] duration-300 w-full",
-              isExpanded ? "max-h-96 opacity-100" : "max-h-0 opacity-0 p-0",
+              "flex flex-col gap-2 overflow-auto transition-[max-height,opacity,padding] duration-300 w-full",
+              isExpanded
+                ? "max-h-96 opacity-100 mt-2 ml-2"
+                : "max-h-0 opacity-0 p-0",
             )}
           >
             {message.reasoning.map((reasoningStep, index) => (
               <div key={index} className="flex flex-col gap-1">
                 {message.reasoning?.length && message.reasoning.length > 1 && (
-                  <span className="text-muted-foreground text-xs font-medium">
-                    Step {index + 1}:
+                  <span className="text-muted-foreground text-xs font-medium px-1">
+                    Step {index + 1}
                   </span>
                 )}
                 {reasoningStep ? (
-                  <div className="bg-muted/50 rounded-md p-3 text-xs overflow-x-auto overflow-y-auto max-w-full">
-                    <div className="whitespace-pre-wrap break-words">
+                  <div className="bg-card rounded-lg p-4 text-xs overflow-x-auto overflow-y-auto max-w-full border border-border">
+                    <div className="whitespace-pre-wrap break-words text-foreground">
                       <Streamdown components={markdownComponents}>
                         {reasoningStep}
                       </Streamdown>

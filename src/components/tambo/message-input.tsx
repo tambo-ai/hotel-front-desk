@@ -50,16 +50,18 @@ const messageInputVariants = cva("w-full", {
     variant: {
       default: "",
       solid: [
-        "[&>div]:bg-background",
-        "[&>div]:border-0",
-        "[&>div]:shadow-xl [&>div]:shadow-black/5 [&>div]:dark:shadow-black/20",
-        "[&>div]:ring-1 [&>div]:ring-black/5 [&>div]:dark:ring-white/10",
+        "[&>div]:bg-card",
+        "[&>div]:border",
+        "[&>div]:border-border",
+        "[&>div]:shadow-sm",
+        "[&>div]:hover:border-border/60",
         "[&_textarea]:bg-transparent",
         "[&_textarea]:rounded-lg",
       ].join(" "),
       bordered: [
         "[&>div]:bg-transparent",
-        "[&>div]:border-2 [&>div]:border-gray-300 [&>div]:dark:border-zinc-600",
+        "[&>div]:border-2",
+        "[&>div]:border-border",
         "[&>div]:shadow-none",
         "[&_textarea]:bg-transparent",
         "[&_textarea]:border-0",
@@ -132,8 +134,7 @@ const useMessageInputContext = () => {
  * Props for the MessageInput component.
  * Extends standard HTMLFormElement attributes.
  */
-export interface MessageInputProps
-  extends React.HTMLAttributes<HTMLFormElement> {
+export interface MessageInputProps extends React.HTMLAttributes<HTMLFormElement> {
   /** The context key identifying which thread to send messages to. */
   contextKey?: string;
   /** Optional styling variant for the input container. */
@@ -373,15 +374,15 @@ const MessageInputInternal = React.forwardRef<
       >
         <div
           className={cn(
-            "relative flex flex-col rounded-xl bg-background shadow-md p-2 px-3",
+            "relative flex flex-col rounded-xl bg-card p-3 transition-all duration-200",
             isDragging
-              ? "border border-dashed border-emerald-400"
-              : "border border-border",
+              ? "border-2 border-dashed border-accent shadow-md"
+              : "border border-border/50 shadow-sm hover:border-border",
           )}
         >
           {isDragging && (
-            <div className="absolute inset-0 rounded-xl bg-emerald-50/90 dark:bg-emerald-950/30 flex items-center justify-center pointer-events-none z-20">
-              <p className="text-emerald-700 dark:text-emerald-300 font-medium">
+            <div className="absolute inset-0 rounded-xl bg-accent/10 flex items-center justify-center pointer-events-none z-20">
+              <p className="text-accent font-medium text-sm">
                 Drop files here to add to conversation
               </p>
             </div>
@@ -423,8 +424,7 @@ declare global {
  * Props for the MessageInputTextarea component.
  * Extends standard TextareaHTMLAttributes.
  */
-export interface MessageInputTextareaProps
-  extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
+export interface MessageInputTextareaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
   /** Custom placeholder text. */
   placeholder?: string;
 }
@@ -502,7 +502,7 @@ const MessageInputTextarea = ({
       onKeyDown={handleKeyDown}
       onPaste={handlePaste}
       className={cn(
-        "flex-1 p-3 rounded-t-lg bg-background text-foreground resize-none text-sm min-h-[82px] max-h-[40vh] focus:outline-none placeholder:text-muted-foreground/50",
+        "flex-1 p-2 rounded-lg bg-transparent text-foreground resize-none text-sm min-h-[72px] max-h-[40vh] focus:outline-none placeholder:text-muted-foreground/60 leading-relaxed",
         className,
       )}
       disabled={isPending || isUpdatingToken}
@@ -519,8 +519,7 @@ MessageInputTextarea.displayName = "MessageInput.Textarea";
  * Props for the MessageInputSubmitButton component.
  * Extends standard ButtonHTMLAttributes.
  */
-export interface MessageInputSubmitButtonProps
-  extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+export interface MessageInputSubmitButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   /** Optional content to display inside the button. */
   children?: React.ReactNode;
 }
@@ -554,7 +553,10 @@ const MessageInputSubmitButton = React.forwardRef<
   };
 
   const buttonClasses = cn(
-    "w-10 h-10 bg-black/80 text-white rounded-lg hover:bg-black/70 disabled:opacity-50 flex items-center justify-center enabled:cursor-pointer",
+    "w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-200 enabled:cursor-pointer disabled:opacity-50",
+    isPending
+      ? "bg-destructive/90 text-white hover:bg-destructive"
+      : "bg-accent text-accent-foreground hover:bg-accent/90",
     className,
   );
 
@@ -630,7 +632,7 @@ const MessageInputMcpConfigButton = React.forwardRef<
   const [isModalOpen, setIsModalOpen] = React.useState(false);
 
   const buttonClasses = cn(
-    "w-10 h-10 rounded-lg border border-border bg-background text-foreground transition-colors hover:bg-muted disabled:opacity-50 disabled:pointer-events-none flex items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+    "w-9 h-9 rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:opacity-50 disabled:pointer-events-none flex items-center justify-center",
     className,
   );
 
@@ -703,8 +705,7 @@ MessageInputError.displayName = "MessageInput.Error";
 /**
  * Props for the MessageInputFileButton component.
  */
-export interface MessageInputFileButtonProps
-  extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+export interface MessageInputFileButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   /** Accept attribute for file input - defaults to image types */
   accept?: string;
   /** Allow multiple file selection */
@@ -748,7 +749,7 @@ const MessageInputFileButton = React.forwardRef<
   };
 
   const buttonClasses = cn(
-    "w-10 h-10 rounded-lg border border-border bg-background text-foreground transition-colors hover:bg-muted disabled:opacity-50 disabled:pointer-events-none flex items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+    "w-9 h-9 rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:opacity-50 disabled:pointer-events-none flex items-center justify-center",
     className,
   );
 
@@ -896,10 +897,10 @@ const ImageContextBadge: React.FC<ImageContextBadgeProps> = ({
       onClick={onToggle}
       aria-expanded={isExpanded}
       className={cn(
-        "relative flex items-center rounded-lg border overflow-hidden",
-        "border-border bg-background hover:bg-muted cursor-pointer",
-        "transition-[width,height,padding] duration-200 ease-in-out",
-        isExpanded ? "w-40 h-28 p-0" : "w-32 h-9 pl-3 pr-8 gap-2",
+        "relative flex items-center rounded-xl border overflow-hidden",
+        "border-border bg-muted/50 hover:bg-muted cursor-pointer",
+        "transition-all duration-200 ease-in-out",
+        isExpanded ? "w-40 h-28 p-0" : "w-32 h-8 pl-3 pr-8 gap-2",
       )}
     >
       {isExpanded && (
@@ -926,7 +927,7 @@ const ImageContextBadge: React.FC<ImageContextBadgeProps> = ({
       )}
       <span
         className={cn(
-          "flex items-center gap-1.5 text-sm text-foreground truncate leading-none transition-opacity duration-150",
+          "flex items-center gap-1.5 text-xs text-muted-foreground truncate leading-none transition-opacity duration-150",
           isExpanded ? "opacity-0" : "opacity-100 delay-100",
         )}
       >
@@ -940,7 +941,7 @@ const ImageContextBadge: React.FC<ImageContextBadgeProps> = ({
         e.stopPropagation();
         onRemove();
       }}
-      className="absolute -top-1 -right-1 w-5 h-5 bg-background border border-border text-muted-foreground rounded-full flex items-center justify-center hover:bg-muted hover:text-foreground transition-colors shadow-sm z-10"
+      className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-card border border-border text-muted-foreground rounded-full flex items-center justify-center hover:bg-destructive hover:text-white hover:border-destructive transition-colors shadow-sm z-10"
       aria-label={`Remove ${displayName}`}
     >
       <X className="w-3 h-3" />
@@ -982,7 +983,7 @@ const MessageInputStagedImages = React.forwardRef<
     <div
       ref={ref}
       className={cn(
-        "flex flex-wrap items-center gap-2 pb-2 pt-1 border-b border-border",
+        "flex flex-wrap items-center gap-2 pb-3 mb-2 border-b border-border/50",
         className,
       )}
       data-slot="message-input-staged-images"

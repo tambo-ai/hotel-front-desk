@@ -1,27 +1,26 @@
 "use client";
 
 import { z } from "zod";
-import { ReservationSchema } from "@/lib/hotel-types";
+import { ReservationSchema, tierColors } from "@/lib/hotel-types";
 import { useHotel } from "@/lib/hotel-store";
 import { guests } from "@/data/mock-data";
-import { Clock, LogOut, BedDouble, DollarSign, User, AlertCircle } from "lucide-react";
+import { LogOut, BedDouble, DollarSign, User, AlertCircle } from "lucide-react";
 
 // Schema for Tambo component registration
 export const DeparturesTablePropsSchema = z.object({
-  reservations: z.array(ReservationSchema).optional().describe("Reservations to display (defaults to today's departures)"),
-  highlightedIds: z.array(z.string()).optional().describe("Reservation IDs to highlight"),
+  reservations: z
+    .array(ReservationSchema)
+    .optional()
+    .describe("Reservations to display (defaults to today's departures)"),
+  highlightedIds: z
+    .array(z.string())
+    .optional()
+    .describe("Reservation IDs to highlight"),
   showEarlyOnly: z.boolean().optional().describe("Only show early check-outs"),
   compact: z.boolean().optional().describe("Compact mode for chat embedding"),
 });
 
 export type DeparturesTableProps = z.infer<typeof DeparturesTablePropsSchema>;
-
-const tierColors = {
-  Member: "bg-slate-600",
-  Silver: "bg-slate-400",
-  Gold: "bg-amber-500",
-  Platinum: "bg-purple-500",
-};
 
 export function DeparturesTable({
   reservations: providedReservations,
@@ -29,13 +28,17 @@ export function DeparturesTable({
   showEarlyOnly = false,
   compact = false,
 }: DeparturesTableProps) {
-  const { state, getTodaysDepartures, selectReservation, getBillingForReservation } = useHotel();
+  const {
+    state,
+    getTodaysDepartures,
+    selectReservation,
+    getBillingForReservation,
+  } = useHotel();
 
   // Get departures from props or state
   let departures = providedReservations || getTodaysDepartures();
 
   // Filter for early checkouts only if requested
-  // Uses the isEarlyCheckout flag from the reservation
   if (showEarlyOnly) {
     departures = departures.filter((res) => res.isEarlyCheckout === true);
   }
@@ -45,20 +48,24 @@ export function DeparturesTable({
 
   if (departures.length === 0) {
     return (
-      <div className="bg-slate-800 rounded-lg p-6 text-center">
-        <User className="w-12 h-12 text-slate-600 mx-auto mb-2" />
-        <p className="text-slate-400">No departures {showEarlyOnly ? "(early only)" : ""} for today</p>
+      <div className="flex flex-col items-center justify-center rounded-lg border border-dashed border-border bg-card/50 p-12 text-center">
+        <div className="mb-3 rounded-full bg-muted p-3">
+          <User className="h-6 w-6 text-muted-foreground" />
+        </div>
+        <p className="text-sm text-muted-foreground">
+          No departures {showEarlyOnly ? "(early only)" : ""} for today
+        </p>
       </div>
     );
   }
 
   if (compact) {
     return (
-      <div className="bg-slate-800 rounded-lg p-3">
-        <h3 className="text-sm font-medium text-slate-400 mb-2">
+      <div className="rounded-lg border border-border bg-card p-3">
+        <h3 className="mb-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
           Today's Departures ({departures.length})
         </h3>
-        <div className="space-y-2">
+        <div className="space-y-1">
           {departures.slice(0, 5).map((res) => {
             const guest = guests.find((g) => g.id === res.guestId);
             const isHighlighted = highlighted.includes(res.id);
@@ -69,32 +76,40 @@ export function DeparturesTable({
             return (
               <div
                 key={res.id}
-                className={`flex items-center justify-between p-2 rounded ${
-                  isHighlighted ? "bg-amber-500/20 ring-1 ring-amber-500" : "bg-slate-700/50"
-                } ${isEarly ? "border-l-2 border-l-amber-500" : ""}`}
+                className={`flex items-center justify-between rounded-md px-2.5 py-2 transition-colors ${
+                  isHighlighted
+                    ? "bg-accent/15 ring-1 ring-accent/50"
+                    : "bg-secondary/50 hover:bg-secondary"
+                } ${isEarly ? "border-l-2 border-l-warning" : ""}`}
               >
                 <div className="flex items-center gap-2">
                   {guest && (
-                    <span className={`w-2 h-2 rounded-full ${tierColors[guest.loyaltyTier]}`} />
+                    <span
+                      className={`h-1.5 w-1.5 rounded-full ${tierColors[guest.loyaltyTier]}`}
+                    />
                   )}
-                  <span className="text-sm text-white">
+                  <span className="text-sm text-foreground">
                     {guest?.firstName} {guest?.lastName}
                   </span>
                   {isEarly && (
-                    <span className="px-1 py-0.5 rounded text-[9px] text-amber-900 bg-amber-400">
+                    <span className="rounded bg-warning/20 px-1 py-0.5 text-[9px] font-medium text-warning">
                       Early
                     </span>
                   )}
                 </div>
                 <div className="flex items-center gap-2 text-xs">
-                  <span className="text-slate-400">Room {res.roomNumber}</span>
-                  <span className="text-emerald-400">${total.toFixed(0)}</span>
+                  <span className="text-muted-foreground">
+                    Room {res.roomNumber}
+                  </span>
+                  <span className="font-medium text-success">
+                    ${total.toFixed(0)}
+                  </span>
                 </div>
               </div>
             );
           })}
           {departures.length > 5 && (
-            <p className="text-xs text-slate-500 text-center">
+            <p className="pt-1 text-center text-xs text-muted-foreground">
               +{departures.length - 5} more departures
             </p>
           )}
@@ -104,83 +119,92 @@ export function DeparturesTable({
   }
 
   return (
-    <div className="bg-slate-800 rounded-lg overflow-hidden">
-      <div className="p-4 border-b border-slate-700">
-        <h3 className="text-lg font-semibold text-white">
+    <div className="overflow-hidden rounded-lg border border-border bg-card">
+      <div className="border-b border-border px-4 py-3">
+        <h3 className="text-sm font-medium text-foreground">
           Today's Departures
-          <span className="text-slate-400 text-sm font-normal ml-2">({departures.length})</span>
+          <span className="ml-2 text-muted-foreground">
+            ({departures.length})
+          </span>
         </h3>
       </div>
 
       <div className="overflow-x-auto">
         <table className="w-full">
-          <thead className="bg-slate-700/50">
-            <tr>
-              <th className="text-left text-xs font-medium text-slate-400 uppercase tracking-wide px-4 py-3">
+          <thead>
+            <tr className="border-b border-border bg-muted/30">
+              <th className="px-4 py-2.5 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground">
                 Guest
               </th>
-              <th className="text-left text-xs font-medium text-slate-400 uppercase tracking-wide px-4 py-3">
+              <th className="px-4 py-2.5 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground">
                 Room
               </th>
-              <th className="text-left text-xs font-medium text-slate-400 uppercase tracking-wide px-4 py-3">
+              <th className="px-4 py-2.5 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground">
                 Check-in Date
               </th>
-              <th className="text-left text-xs font-medium text-slate-400 uppercase tracking-wide px-4 py-3">
+              <th className="px-4 py-2.5 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground">
                 Balance
               </th>
-              <th className="text-right text-xs font-medium text-slate-400 uppercase tracking-wide px-4 py-3">
+              <th className="px-4 py-2.5 text-right text-xs font-medium uppercase tracking-wide text-muted-foreground">
                 Action
               </th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-700/50">
+          <tbody>
             {departures.map((res) => {
               const guest = guests.find((g) => g.id === res.guestId);
               const isHighlighted = highlighted.includes(res.id);
               const billing = getBillingForReservation(res.id);
-              const total = billing.reduce((sum, item) => sum + (item.isComped ? 0 : item.amount), 0);
+              const total = billing.reduce(
+                (sum, item) => sum + (item.isComped ? 0 : item.amount),
+                0,
+              );
               const isEarly = res.isEarlyCheckout === true;
 
               return (
                 <tr
                   key={res.id}
-                  className={`hover:bg-slate-700/30 cursor-pointer transition-colors ${
-                    isHighlighted ? "bg-amber-500/20" : ""
-                  } ${isEarly ? "border-l-2 border-l-amber-500" : ""}`}
+                  className={`cursor-pointer border-b border-border transition-colors last:border-0 hover:bg-hover-bg ${
+                    isHighlighted ? "bg-accent/10" : ""
+                  } ${isEarly ? "border-l-2 border-l-warning" : ""}`}
                   onClick={() => selectReservation(res.id)}
                 >
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-2">
                       {guest && (
-                        <span className={`px-1.5 py-0.5 rounded text-[10px] text-white ${tierColors[guest.loyaltyTier]}`}>
+                        <span
+                          className={`rounded px-1.5 py-0.5 text-[10px] font-semibold text-white ${tierColors[guest.loyaltyTier]}`}
+                        >
                           {guest.loyaltyTier.substring(0, 3).toUpperCase()}
                         </span>
                       )}
-                      <span className="text-white font-medium">
+                      <span className="font-medium text-foreground">
                         {guest?.firstName} {guest?.lastName}
                       </span>
                       {isEarly && (
-                        <span className="px-1.5 py-0.5 rounded text-[10px] text-amber-900 bg-amber-400 flex items-center gap-1">
-                          <AlertCircle className="w-3 h-3" />
+                        <span className="flex items-center gap-1 rounded bg-warning/20 px-1.5 py-0.5 text-[10px] font-medium text-warning">
+                          <AlertCircle className="h-3 w-3" />
                           Early
                         </span>
                       )}
                     </div>
                   </td>
                   <td className="px-4 py-3">
-                    <div className="flex items-center gap-2">
-                      <BedDouble className="w-4 h-4 text-slate-500" />
-                      <span className="text-slate-300">Room {res.roomNumber}</span>
+                    <div className="flex items-center gap-1.5">
+                      <BedDouble className="h-3.5 w-3.5 text-muted-foreground" />
+                      <span className="text-sm text-foreground">
+                        Room {res.roomNumber}
+                      </span>
                     </div>
                   </td>
                   <td className="px-4 py-3">
-                    <span className="text-slate-300">
+                    <span className="text-sm text-foreground">
                       {new Date(res.checkInDate).toLocaleDateString()}
                     </span>
                   </td>
                   <td className="px-4 py-3">
-                    <div className="flex items-center gap-1 text-emerald-400 font-medium">
-                      <DollarSign className="w-4 h-4" />
+                    <div className="flex items-center gap-0.5 font-medium text-success">
+                      <DollarSign className="h-3.5 w-3.5" />
                       {total.toFixed(2)}
                     </div>
                   </td>
@@ -190,9 +214,9 @@ export function DeparturesTable({
                         e.stopPropagation();
                         selectReservation(res.id);
                       }}
-                      className="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded transition-colors flex items-center gap-1 ml-auto"
+                      className="ml-auto flex items-center gap-1.5 rounded-md bg-info px-3 py-1.5 text-xs font-medium text-white transition-all hover:opacity-90 focus-ring"
                     >
-                      <LogOut className="w-3 h-3" />
+                      <LogOut className="h-3 w-3" />
                       Check Out
                     </button>
                   </td>

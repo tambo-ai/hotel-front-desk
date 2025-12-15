@@ -16,14 +16,16 @@ import { BillingStatement } from "./BillingStatement";
 import { GuestProfile } from "./GuestProfile";
 import { CheckInForm } from "./CheckInForm";
 import { GuestMessageComposer } from "./GuestMessageComposer";
+import { SettingsPage } from "./SettingsPage";
 import { guests, reservations } from "@/data/mock-data";
 import {
   BedDouble,
   Users,
   Calendar,
-  DollarSign,
   TrendingUp,
   AlertCircle,
+  ArrowUpRight,
+  ArrowDownRight,
 } from "lucide-react";
 
 export function Dashboard() {
@@ -47,71 +49,76 @@ export function Dashboard() {
 
   // Quick stats
   const availableRooms = state.rooms.filter(
-    (r) => r.status === "available" || r.status === "clean"
+    (r) => r.status === "available" || r.status === "clean",
   ).length;
-  const occupiedRooms = state.rooms.filter((r) => r.status === "occupied").length;
+  const occupiedRooms = state.rooms.filter(
+    (r) => r.status === "occupied",
+  ).length;
   const todaysArrivals = reservations.filter(
-    (r) => r.checkInDate === new Date().toISOString().split("T")[0] && r.status === "confirmed"
+    (r) =>
+      r.checkInDate === new Date().toISOString().split("T")[0] &&
+      r.status === "confirmed",
   ).length;
   const todaysDepartures = reservations.filter(
-    (r) => r.checkOutDate === new Date().toISOString().split("T")[0] && r.status === "checked_in"
+    (r) =>
+      r.checkOutDate === new Date().toISOString().split("T")[0] &&
+      r.status === "checked_in",
   ).length;
 
   return (
-    <div className="min-h-screen bg-slate-900">
+    <div className="min-h-screen bg-background">
       <NavigationTabs />
 
       {/* Main Content */}
-      <div className="p-6">
+      <main className="mx-auto max-w-[1920px] p-6">
         {state.currentView === "dashboard" && (
-          <div className="space-y-6">
+          <div className="space-y-6 animate-in">
             {/* Quick Stats */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
               <StatCard
-                icon={<BedDouble className="w-5 h-5" />}
+                icon={<BedDouble className="h-4 w-4" />}
                 label="Available Rooms"
                 value={availableRooms}
                 subtext={`of ${state.rooms.length} total`}
-                color="emerald"
+                trend={{ value: 2, positive: true }}
+                color="success"
               />
               <StatCard
-                icon={<Users className="w-5 h-5" />}
+                icon={<Users className="h-4 w-4" />}
                 label="Occupied Rooms"
                 value={occupiedRooms}
                 subtext={`${Math.round((occupiedRooms / state.rooms.length) * 100)}% occupancy`}
-                color="blue"
+                trend={{ value: 5, positive: true }}
+                color="info"
               />
               <StatCard
-                icon={<Calendar className="w-5 h-5" />}
+                icon={<Calendar className="h-4 w-4" />}
                 label="Today's Arrivals"
                 value={todaysArrivals}
                 subtext="expected check-ins"
-                color="amber"
+                color="warning"
               />
               <StatCard
-                icon={<TrendingUp className="w-5 h-5" />}
+                icon={<TrendingUp className="h-4 w-4" />}
                 label="Today's Departures"
                 value={todaysDepartures}
                 subtext="expected check-outs"
-                color="purple"
+                color="accent"
               />
             </div>
 
             {/* Main Grid */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              {/* Arrivals */}
+            <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
               <div className="lg:col-span-2">
                 <ArrivalsTable />
               </div>
-
-              {/* Room Type Breakdown */}
               <div>
                 <RoomTypeBreakdown />
               </div>
             </div>
 
             {/* Secondary Grid */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
               <OccupancyChart dateRange="week" />
               <HousekeepingStatus />
             </div>
@@ -119,22 +126,29 @@ export function Dashboard() {
         )}
 
         {state.currentView === "reservations" && (
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div className="lg:col-span-2 space-y-6">
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-3 animate-in">
+            <div className="space-y-6 lg:col-span-2">
               <ArrivalsTable />
               <DeparturesTable />
             </div>
-            <div className="space-y-6">
+            <div className="space-y-4">
               {selectedReservation ? (
                 <>
-                  <ReservationDetail reservation={selectedReservation} showActions />
+                  <ReservationDetail
+                    reservation={selectedReservation}
+                    showActions
+                  />
                   {selectedGuest && <GuestProfile guest={selectedGuest} />}
                   <BillingStatement reservationId={selectedReservation.id} />
                 </>
               ) : (
-                <div className="bg-slate-800 rounded-lg p-8 text-center">
-                  <AlertCircle className="w-12 h-12 text-slate-600 mx-auto mb-3" />
-                  <p className="text-slate-400">Select a reservation to view details</p>
+                <div className="flex flex-col items-center justify-center rounded-lg border border-dashed border-border bg-card/50 p-12 text-center">
+                  <div className="mb-3 rounded-full bg-muted p-3">
+                    <AlertCircle className="h-6 w-6 text-muted-foreground" />
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    Select a reservation to view details
+                  </p>
                 </div>
               )}
             </div>
@@ -142,19 +156,26 @@ export function Dashboard() {
         )}
 
         {state.currentView === "rooms" && (
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-            <div className="lg:col-span-3">
-              <RoomGrid />
-            </div>
-            <div className="space-y-6">
-              <RoomTypeBreakdown />
+          <div className="space-y-6 animate-in">
+            {/* On mobile: stats first, then grid. On desktop: side by side */}
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:hidden">
+              <RoomTypeBreakdown compact />
               <HousekeepingStatus filterStatus="dirty" compact />
+            </div>
+            <div className="grid grid-cols-1 gap-6 lg:grid-cols-4">
+              <div className="lg:col-span-3">
+                <RoomGrid />
+              </div>
+              <div className="hidden space-y-4 lg:block">
+                <RoomTypeBreakdown />
+                <HousekeepingStatus filterStatus="dirty" compact />
+              </div>
             </div>
           </div>
         )}
 
         {state.currentView === "guests" && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 animate-in">
             {guests.slice(0, 12).map((guest) => (
               <GuestProfile key={guest.id} guest={guest} showHistory />
             ))}
@@ -162,9 +183,9 @@ export function Dashboard() {
         )}
 
         {state.currentView === "housekeeping" && (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 animate-in">
             <HousekeepingStatus />
-            <div className="space-y-6">
+            <div className="space-y-4">
               <HousekeepingStatus filterStatus="dirty" />
               <HousekeepingStatus filterStatus="in_progress" />
             </div>
@@ -172,9 +193,13 @@ export function Dashboard() {
         )}
 
         {state.currentView === "reports" && (
-          <div className="space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <OccupancyChart dateRange="week" showHistorical chartType="composed" />
+          <div className="space-y-6 animate-in">
+            <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+              <OccupancyChart
+                dateRange="week"
+                showHistorical
+                chartType="composed"
+              />
               <RoomTypeBreakdown />
             </div>
             <OccupancyChart dateRange="month" chartType="bar" />
@@ -182,25 +207,31 @@ export function Dashboard() {
         )}
 
         {state.currentView === "rates" && (
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-3 animate-in">
             <div className="lg:col-span-2">
               <RatePricingForm showCompetitors />
             </div>
-            <div className="space-y-6">
+            <div className="space-y-4">
               <OccupancyChart dateRange="week" compact />
               <RoomTypeBreakdown compact />
             </div>
           </div>
         )}
-      </div>
+
+        {state.currentView === "settings" && (
+          <div className="max-w-lg animate-in">
+            <SettingsPage />
+          </div>
+        )}
+      </main>
 
       {/* Check-in Form Modal */}
       {state.checkInReservationId && <CheckInForm />}
 
       {/* Draft Message Modal */}
       {state.draftMessage && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="max-w-2xl w-full">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-backdrop p-4">
+          <div className="w-full max-w-2xl fade-in">
             <GuestMessageComposer
               to={state.draftMessage.to}
               subject={state.draftMessage.subject}
@@ -218,34 +249,57 @@ function StatCard({
   label,
   value,
   subtext,
+  trend,
   color,
 }: {
   icon: React.ReactNode;
   label: string;
   value: number;
   subtext: string;
-  color: "emerald" | "blue" | "amber" | "purple";
+  trend?: { value: number; positive: boolean };
+  color: "success" | "info" | "warning" | "accent";
 }) {
-  const colors = {
-    emerald: "bg-emerald-500/20 text-emerald-400",
-    blue: "bg-blue-500/20 text-blue-400",
-    amber: "bg-amber-500/20 text-amber-400",
-    purple: "bg-purple-500/20 text-purple-400",
+  const colorClasses = {
+    success: "text-success",
+    info: "text-info",
+    warning: "text-warning",
+    accent: "text-accent",
+  };
+
+  const bgClasses = {
+    success: "bg-success/10",
+    info: "bg-info/10",
+    warning: "bg-warning/10",
+    accent: "bg-accent/10",
   };
 
   return (
-    <div className="bg-slate-800 rounded-lg p-4">
-      <div className="flex items-center gap-3">
-        <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${colors[color]}`}>
-          {icon}
+    <div className="group rounded-lg border border-border bg-card p-4 transition-all hover:border-muted-foreground/20 hover:shadow-sm">
+      <div className="mb-3 flex items-center justify-between">
+        <div className={`rounded-md p-2 ${bgClasses[color]}`}>
+          <span className={colorClasses[color]}>{icon}</span>
         </div>
-        <div>
-          <p className="text-sm text-slate-400">{label}</p>
-          <div className="flex items-baseline gap-2">
-            <span className="text-2xl font-bold text-white">{value}</span>
-            <span className="text-xs text-slate-500">{subtext}</span>
+        {trend && (
+          <div
+            className={`flex items-center gap-0.5 text-xs font-medium ${
+              trend.positive ? "text-success" : "text-destructive"
+            }`}
+          >
+            {trend.positive ? (
+              <ArrowUpRight className="h-3 w-3" />
+            ) : (
+              <ArrowDownRight className="h-3 w-3" />
+            )}
+            {trend.value}%
           </div>
-        </div>
+        )}
+      </div>
+      <div className="space-y-1">
+        <p className="text-2xl font-semibold tracking-tight text-foreground">
+          {value}
+        </p>
+        <p className="text-xs font-medium text-muted-foreground">{label}</p>
+        <p className="text-[11px] text-muted-foreground/70">{subtext}</p>
       </div>
     </div>
   );
