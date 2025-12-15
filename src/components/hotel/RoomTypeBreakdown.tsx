@@ -166,12 +166,13 @@ export function RoomTypeBreakdown({
                     border: "1px solid #374151",
                     borderRadius: "8px",
                   }}
-                  formatter={(value: number, name: string, props: unknown) => {
+                  formatter={(value: number | undefined, name: string | undefined, props: unknown) => {
                     const p = props as { payload?: { available: number; total: number } };
+                    const n = name ?? "";
                     if (p.payload) {
-                      return [`${p.payload.available}/${p.payload.total} rooms`, name];
+                      return [`${p.payload.available}/${p.payload.total} rooms`, n];
                     }
-                    return [`${value}`, name];
+                    return [`${value ?? 0}`, n];
                   }}
                 />
               </PieChart>

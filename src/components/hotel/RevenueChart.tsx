@@ -114,7 +114,7 @@ export function RevenueChart({
                   border: "1px solid #374151",
                   borderRadius: "8px",
                 }}
-                formatter={(value: number) => [`$${value.toFixed(2)}`, "Revenue"]}
+                formatter={(value: number | undefined) => [`$${(value ?? 0).toFixed(2)}`, "Revenue"]}
               />
               <Bar dataKey="value" radius={[0, 4, 4, 0]}>
                 {chartData.map((entry, index) => (

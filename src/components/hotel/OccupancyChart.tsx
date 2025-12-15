@@ -252,11 +252,13 @@ export function OccupancyChart({
             borderRadius: "8px",
           }}
           labelStyle={{ color: "#fff" }}
-          formatter={(value: number, name: string) => {
-            if (name === "occupancyRate") return [`${value}%`, "Current"];
-            if (name === "historicalOccupancy") return [`${value}%`, "Last Year"];
-            if (name.startsWith("competitor")) return [`${value}%`, name.replace("competitor", "Competitor ")];
-            return [`${value}%`, name];
+          formatter={(value: number | undefined, name: string | undefined) => {
+            const v = value ?? 0;
+            const n = name ?? "";
+            if (n === "occupancyRate") return [`${v}%`, "Current"];
+            if (n === "historicalOccupancy") return [`${v}%`, "Last Year"];
+            if (n.startsWith("competitor")) return [`${v}%`, n.replace("competitor", "Competitor ")];
+            return [`${v}%`, n];
           }}
         />
         <Legend />
