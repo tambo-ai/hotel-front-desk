@@ -119,13 +119,16 @@ export function NavigationTabs() {
           ))}
         </div>
 
-        {/* Right section - search hint */}
+        {/* Right section - search hint (visual indicator only) */}
         <div className="ml-auto flex items-center gap-3">
-          <button className="flex items-center gap-2 rounded-md border border-border bg-secondary/50 px-3 py-1.5 text-[13px] text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground">
-            <Command className="h-3.5 w-3.5" />
+          <div
+            role="presentation"
+            className="flex items-center gap-2 rounded-md border border-border bg-secondary/50 px-3 py-1.5 text-[13px] text-muted-foreground"
+          >
+            <Command className="h-3.5 w-3.5" aria-hidden="true" />
             <span>Search...</span>
             <kbd className="kbd">K</kbd>
-          </button>
+          </div>
         </div>
       </div>
     </nav>

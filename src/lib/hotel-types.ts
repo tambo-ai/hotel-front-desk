@@ -48,11 +48,12 @@ export const tierColors: Record<LoyaltyTier, string> = {
 };
 
 export const tierBadgeStyles: Record<LoyaltyTier, string> = {
-  Member: "bg-muted text-foreground",
-  Silver: "bg-gradient-to-r from-tier-silver to-tier-silver/70 text-foreground",
-  Gold: "bg-gradient-to-r from-tier-gold to-tier-gold/70 text-foreground",
+  Member: "bg-tier-member text-tier-member-foreground",
+  Silver:
+    "bg-gradient-to-r from-tier-silver to-tier-silver/70 text-tier-silver-foreground",
+  Gold: "bg-gradient-to-r from-tier-gold to-tier-gold/70 text-tier-gold-foreground",
   Platinum:
-    "bg-gradient-to-r from-tier-platinum to-tier-platinum/70 text-foreground",
+    "bg-gradient-to-r from-tier-platinum to-tier-platinum/70 text-tier-platinum-foreground",
 };
 
 export const StayHistoryItemSchema = z.object({
@@ -458,6 +459,7 @@ export const NavigateToViewArgsSchema = z.object({
       "housekeeping",
       "reports",
       "rates",
+      "settings",
     ])
     .describe("View to navigate to"),
 });

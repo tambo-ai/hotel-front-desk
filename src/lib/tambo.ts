@@ -176,7 +176,7 @@ export const tools: TamboTool[] = [
   {
     name: "navigateToView",
     description:
-      "Navigate the main UI to a specific view (dashboard, reservations, rooms, guests, housekeeping, reports, rates). Use this to switch between different sections of the app.",
+      "Navigate the main UI to a specific view (dashboard, reservations, rooms, guests, housekeeping, reports, rates, settings). Use this to switch between different sections of the app.",
     tool: navigateToView,
     toolSchema: z
       .function()
@@ -191,6 +191,7 @@ export const tools: TamboTool[] = [
               "housekeeping",
               "reports",
               "rates",
+              "settings",
             ])
             .describe("View to navigate to"),
         }),

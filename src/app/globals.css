@@ -35,9 +35,13 @@
 
     /* Loyalty Tier Colors */
     --color-tier-member: var(--tier-member);
+    --color-tier-member-foreground: var(--tier-member-foreground);
     --color-tier-silver: var(--tier-silver);
+    --color-tier-silver-foreground: var(--tier-silver-foreground);
     --color-tier-gold: var(--tier-gold);
+    --color-tier-gold-foreground: var(--tier-gold-foreground);
     --color-tier-platinum: var(--tier-platinum);
+    --color-tier-platinum-foreground: var(--tier-platinum-foreground);
 
     /* Status Colors */
     --color-success: var(--success);
@@ -89,9 +93,13 @@
 
     /* Loyalty Tier Colors - more subtle */
     --tier-member: oklch(0.52 0 0);
+    --tier-member-foreground: oklch(0.98 0 0);
     --tier-silver: oklch(0.62 0.01 250);
+    --tier-silver-foreground: oklch(0.98 0 0);
     --tier-gold: oklch(0.68 0.1 80);
+    --tier-gold-foreground: oklch(0.15 0.02 80);
     --tier-platinum: oklch(0.55 0.1 264);
+    --tier-platinum-foreground: oklch(0.98 0 0);
 
     /* Surface levels */
     --surface-elevated: oklch(1 0 0);
@@ -167,9 +175,13 @@
 
     /* Loyalty Tier Colors (Dark Mode) - more subtle */
     --tier-member: oklch(0.48 0 0);
+    --tier-member-foreground: oklch(0.95 0 0);
     --tier-silver: oklch(0.65 0.01 250);
+    --tier-silver-foreground: oklch(0.95 0 0);
     --tier-gold: oklch(0.7 0.1 80);
+    --tier-gold-foreground: oklch(0.15 0.02 80);
     --tier-platinum: oklch(0.6 0.1 264);
+    --tier-platinum-foreground: oklch(0.95 0 0);
 
     /* Surface levels */
     --surface-elevated: oklch(0.175 0.005 270);
