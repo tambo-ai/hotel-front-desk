@@ -59,7 +59,7 @@ function createRoom(
   type: RoomType,
   status: RoomStatus,
   features: string[],
-  currentGuestId?: string
+  currentGuestId?: string,
 ): Room {
   const baseRates: Record<RoomType, number> = {
     King: 189,
@@ -116,7 +116,13 @@ export const rooms: Room[] = [
   createRoom(405, "King", "dirty", ["high_floor", "city_view"]),
 
   // Floor 5 - Suites (501-505)
-  createRoom(501, "Suite", "occupied", ["city_view", "balcony", "corner"], "guest-12"),
+  createRoom(
+    501,
+    "Suite",
+    "occupied",
+    ["city_view", "balcony", "corner"],
+    "guest-12",
+  ),
   createRoom(502, "Suite", "clean", ["city_view", "balcony"]),
   createRoom(503, "Suite", "available", ["city_view", "corner"]),
   createRoom(504, "Suite", "occupied", ["city_view", "balcony"], "guest-13"),
@@ -145,8 +151,20 @@ export const guests: Guest[] = [
     loyaltyNumber: "PLT-889234",
     preferences: ["high_floor", "city_view", "extra_pillows"],
     stayHistory: [
-      { id: "stay-1", checkInDate: "2024-06-15", checkOutDate: "2024-06-18", roomNumber: 401, totalSpent: 892 },
-      { id: "stay-2", checkInDate: "2024-09-22", checkOutDate: "2024-09-25", roomNumber: 315, totalSpent: 756 },
+      {
+        id: "stay-1",
+        checkInDate: "2024-06-15",
+        checkOutDate: "2024-06-18",
+        roomNumber: 401,
+        totalSpent: 892,
+      },
+      {
+        id: "stay-2",
+        checkInDate: "2024-09-22",
+        checkOutDate: "2024-09-25",
+        roomNumber: 315,
+        totalSpent: 756,
+      },
     ],
   },
   {
@@ -159,7 +177,13 @@ export const guests: Guest[] = [
     loyaltyNumber: "GLD-556781",
     preferences: ["quiet_room", "late_checkout"],
     stayHistory: [
-      { id: "stay-3", checkInDate: "2024-08-10", checkOutDate: "2024-08-12", roomNumber: 302, totalSpent: 412 },
+      {
+        id: "stay-3",
+        checkInDate: "2024-08-10",
+        checkOutDate: "2024-08-12",
+        roomNumber: 302,
+        totalSpent: 412,
+      },
     ],
   },
   {
@@ -183,7 +207,13 @@ export const guests: Guest[] = [
     loyaltyNumber: "SLV-445566",
     preferences: ["accessible", "ground_floor"],
     stayHistory: [
-      { id: "stay-4", checkInDate: "2024-11-01", checkOutDate: "2024-11-03", roomNumber: 202, totalSpent: 356 },
+      {
+        id: "stay-4",
+        checkInDate: "2024-11-01",
+        checkOutDate: "2024-11-03",
+        roomNumber: 202,
+        totalSpent: 356,
+      },
     ],
   },
   {
@@ -196,9 +226,27 @@ export const guests: Guest[] = [
     loyaltyNumber: "PLT-778899",
     preferences: ["city_view", "balcony", "champagne"],
     stayHistory: [
-      { id: "stay-5", checkInDate: "2024-03-20", checkOutDate: "2024-03-25", roomNumber: 501, totalSpent: 2145 },
-      { id: "stay-6", checkInDate: "2024-07-14", checkOutDate: "2024-07-17", roomNumber: 504, totalSpent: 1456 },
-      { id: "stay-7", checkInDate: "2024-10-05", checkOutDate: "2024-10-08", roomNumber: 501, totalSpent: 1678 },
+      {
+        id: "stay-5",
+        checkInDate: "2024-03-20",
+        checkOutDate: "2024-03-25",
+        roomNumber: 501,
+        totalSpent: 2145,
+      },
+      {
+        id: "stay-6",
+        checkInDate: "2024-07-14",
+        checkOutDate: "2024-07-17",
+        roomNumber: 504,
+        totalSpent: 1456,
+      },
+      {
+        id: "stay-7",
+        checkInDate: "2024-10-05",
+        checkOutDate: "2024-10-08",
+        roomNumber: 501,
+        totalSpent: 1678,
+      },
     ],
   },
   {
@@ -233,7 +281,13 @@ export const guests: Guest[] = [
     loyaltyNumber: "SLV-556677",
     preferences: ["quiet_room"],
     stayHistory: [
-      { id: "stay-8", checkInDate: "2024-09-01", checkOutDate: "2024-09-04", roomNumber: 307, totalSpent: 623 },
+      {
+        id: "stay-8",
+        checkInDate: "2024-09-01",
+        checkOutDate: "2024-09-04",
+        roomNumber: 307,
+        totalSpent: 623,
+      },
     ],
   },
   {
@@ -246,7 +300,13 @@ export const guests: Guest[] = [
     loyaltyNumber: "GLD-667788",
     preferences: ["corner", "high_floor"],
     stayHistory: [
-      { id: "stay-9", checkInDate: "2024-05-10", checkOutDate: "2024-05-12", roomNumber: 314, totalSpent: 445 },
+      {
+        id: "stay-9",
+        checkInDate: "2024-05-10",
+        checkOutDate: "2024-05-12",
+        roomNumber: 314,
+        totalSpent: 445,
+      },
     ],
   },
   {
@@ -259,8 +319,20 @@ export const guests: Guest[] = [
     loyaltyNumber: "PLT-889900",
     preferences: ["city_view", "newspaper", "gym_access"],
     stayHistory: [
-      { id: "stay-10", checkInDate: "2024-04-15", checkOutDate: "2024-04-20", roomNumber: 401, totalSpent: 1234 },
-      { id: "stay-11", checkInDate: "2024-08-22", checkOutDate: "2024-08-26", roomNumber: 403, totalSpent: 978 },
+      {
+        id: "stay-10",
+        checkInDate: "2024-04-15",
+        checkOutDate: "2024-04-20",
+        roomNumber: 401,
+        totalSpent: 1234,
+      },
+      {
+        id: "stay-11",
+        checkInDate: "2024-08-22",
+        checkOutDate: "2024-08-26",
+        roomNumber: 403,
+        totalSpent: 978,
+      },
     ],
   },
   {
@@ -284,8 +356,20 @@ export const guests: Guest[] = [
     loyaltyNumber: "PLT-112244",
     preferences: ["suite", "balcony", "champagne", "spa_access"],
     stayHistory: [
-      { id: "stay-12", checkInDate: "2024-02-14", checkOutDate: "2024-02-18", roomNumber: 501, totalSpent: 2567 },
-      { id: "stay-13", checkInDate: "2024-06-01", checkOutDate: "2024-06-05", roomNumber: 504, totalSpent: 2890 },
+      {
+        id: "stay-12",
+        checkInDate: "2024-02-14",
+        checkOutDate: "2024-02-18",
+        roomNumber: 501,
+        totalSpent: 2567,
+      },
+      {
+        id: "stay-13",
+        checkInDate: "2024-06-01",
+        checkOutDate: "2024-06-05",
+        roomNumber: 504,
+        totalSpent: 2890,
+      },
     ],
   },
   {
@@ -332,7 +416,13 @@ export const guests: Guest[] = [
     loyaltyNumber: "GLD-889911",
     preferences: ["high_floor", "city_view"],
     stayHistory: [
-      { id: "stay-14", checkInDate: "2024-10-20", checkOutDate: "2024-10-23", roomNumber: 315, totalSpent: 678 },
+      {
+        id: "stay-14",
+        checkInDate: "2024-10-20",
+        checkOutDate: "2024-10-23",
+        roomNumber: 315,
+        totalSpent: 678,
+      },
     ],
   },
   {
@@ -345,7 +435,13 @@ export const guests: Guest[] = [
     loyaltyNumber: "PLT-990022",
     preferences: ["suite", "spa_access", "late_checkout"],
     stayHistory: [
-      { id: "stay-15", checkInDate: "2024-07-04", checkOutDate: "2024-07-08", roomNumber: 502, totalSpent: 1890 },
+      {
+        id: "stay-15",
+        checkInDate: "2024-07-04",
+        checkOutDate: "2024-07-08",
+        roomNumber: 502,
+        totalSpent: 1890,
+      },
     ],
   },
   {
@@ -380,7 +476,13 @@ export const guests: Guest[] = [
     loyaltyNumber: "GLD-445577",
     preferences: ["corner"],
     stayHistory: [
-      { id: "stay-16", checkInDate: "2024-11-10", checkOutDate: "2024-11-13", roomNumber: 304, totalSpent: 589 },
+      {
+        id: "stay-16",
+        checkInDate: "2024-11-10",
+        checkOutDate: "2024-11-13",
+        roomNumber: 304,
+        totalSpent: 589,
+      },
     ],
   },
   {
@@ -404,8 +506,20 @@ export const guests: Guest[] = [
     loyaltyNumber: "PLT-889933",
     preferences: ["city_view", "balcony", "newspaper"],
     stayHistory: [
-      { id: "stay-17", checkInDate: "2024-01-15", checkOutDate: "2024-01-20", roomNumber: 501, totalSpent: 2345 },
-      { id: "stay-18", checkInDate: "2024-05-25", checkOutDate: "2024-05-29", roomNumber: 505, totalSpent: 1987 },
+      {
+        id: "stay-17",
+        checkInDate: "2024-01-15",
+        checkOutDate: "2024-01-20",
+        roomNumber: 501,
+        totalSpent: 2345,
+      },
+      {
+        id: "stay-18",
+        checkInDate: "2024-05-25",
+        checkOutDate: "2024-05-29",
+        roomNumber: 505,
+        totalSpent: 1987,
+      },
     ],
   },
   {
@@ -715,54 +829,318 @@ export const reservations: Reservation[] = [
 
 export const billingItems: BillingItem[] = [
   // Res-1 (Sarah Chen - Platinum)
-  { id: "bill-1", reservationId: "res-1", description: "Room Charge - Queen", category: "room", amount: 159, date: getDateOffset(-2), isComped: false },
-  { id: "bill-2", reservationId: "res-1", description: "Room Charge - Queen", category: "room", amount: 159, date: getDateOffset(-1), isComped: false },
-  { id: "bill-3", reservationId: "res-1", description: "Room Service - Breakfast", category: "food", amount: 32, date: getDateOffset(-1), isComped: false },
-  { id: "bill-4", reservationId: "res-1", description: "Minibar", category: "amenity", amount: 24, date: getDateOffset(-1), isComped: false },
+  {
+    id: "bill-1",
+    reservationId: "res-1",
+    description: "Room Charge - Queen",
+    category: "room",
+    amount: 159,
+    date: getDateOffset(-2),
+    isComped: false,
+  },
+  {
+    id: "bill-2",
+    reservationId: "res-1",
+    description: "Room Charge - Queen",
+    category: "room",
+    amount: 159,
+    date: getDateOffset(-1),
+    isComped: false,
+  },
+  {
+    id: "bill-3",
+    reservationId: "res-1",
+    description: "Room Service - Breakfast",
+    category: "food",
+    amount: 32,
+    date: getDateOffset(-1),
+    isComped: false,
+  },
+  {
+    id: "bill-4",
+    reservationId: "res-1",
+    description: "Minibar",
+    category: "amenity",
+    amount: 24,
+    date: getDateOffset(-1),
+    isComped: false,
+  },
 
   // Res-5 (Jennifer Brown - Platinum)
-  { id: "bill-5", reservationId: "res-5", description: "Room Charge - King", category: "room", amount: 189, date: getDateOffset(-2), isComped: false },
-  { id: "bill-6", reservationId: "res-5", description: "Room Charge - King", category: "room", amount: 189, date: getDateOffset(-1), isComped: false },
-  { id: "bill-7", reservationId: "res-5", description: "Spa Treatment", category: "service", amount: 150, date: getDateOffset(-1), isComped: false },
-  { id: "bill-8", reservationId: "res-5", description: "Room Service - Dinner", category: "food", amount: 87, date: getDateOffset(-1), isComped: false },
-  { id: "bill-9", reservationId: "res-5", description: "Champagne (Welcome)", category: "amenity", amount: 0, date: getDateOffset(-2), isComped: true },
+  {
+    id: "bill-5",
+    reservationId: "res-5",
+    description: "Room Charge - King",
+    category: "room",
+    amount: 189,
+    date: getDateOffset(-2),
+    isComped: false,
+  },
+  {
+    id: "bill-6",
+    reservationId: "res-5",
+    description: "Room Charge - King",
+    category: "room",
+    amount: 189,
+    date: getDateOffset(-1),
+    isComped: false,
+  },
+  {
+    id: "bill-7",
+    reservationId: "res-5",
+    description: "Spa Treatment",
+    category: "service",
+    amount: 150,
+    date: getDateOffset(-1),
+    isComped: false,
+  },
+  {
+    id: "bill-8",
+    reservationId: "res-5",
+    description: "Room Service - Dinner",
+    category: "food",
+    amount: 87,
+    date: getDateOffset(-1),
+    isComped: false,
+  },
+  {
+    id: "bill-9",
+    reservationId: "res-5",
+    description: "Champagne (Welcome)",
+    category: "amenity",
+    amount: 0,
+    date: getDateOffset(-2),
+    isComped: true,
+  },
 
   // Res-9 (Daniel Clark - Suite - Platinum)
-  { id: "bill-10", reservationId: "res-9", description: "Room Charge - Suite", category: "room", amount: 349, date: getDateOffset(-3), isComped: false },
-  { id: "bill-11", reservationId: "res-9", description: "Room Charge - Suite", category: "room", amount: 349, date: getDateOffset(-2), isComped: false },
-  { id: "bill-12", reservationId: "res-9", description: "Room Charge - Suite", category: "room", amount: 349, date: getDateOffset(-1), isComped: false },
-  { id: "bill-13", reservationId: "res-9", description: "Spa Package - Deluxe", category: "service", amount: 275, date: getDateOffset(-2), isComped: false },
-  { id: "bill-14", reservationId: "res-9", description: "Restaurant - Fine Dining", category: "food", amount: 245, date: getDateOffset(-2), isComped: false },
-  { id: "bill-15", reservationId: "res-9", description: "Minibar", category: "amenity", amount: 56, date: getDateOffset(-1), isComped: false },
-  { id: "bill-16", reservationId: "res-9", description: "Champagne (VIP)", category: "amenity", amount: 0, date: getDateOffset(-3), isComped: true },
+  {
+    id: "bill-10",
+    reservationId: "res-9",
+    description: "Room Charge - Suite",
+    category: "room",
+    amount: 349,
+    date: getDateOffset(-3),
+    isComped: false,
+  },
+  {
+    id: "bill-11",
+    reservationId: "res-9",
+    description: "Room Charge - Suite",
+    category: "room",
+    amount: 349,
+    date: getDateOffset(-2),
+    isComped: false,
+  },
+  {
+    id: "bill-12",
+    reservationId: "res-9",
+    description: "Room Charge - Suite",
+    category: "room",
+    amount: 349,
+    date: getDateOffset(-1),
+    isComped: false,
+  },
+  {
+    id: "bill-13",
+    reservationId: "res-9",
+    description: "Spa Package - Deluxe",
+    category: "service",
+    amount: 275,
+    date: getDateOffset(-2),
+    isComped: false,
+  },
+  {
+    id: "bill-14",
+    reservationId: "res-9",
+    description: "Restaurant - Fine Dining",
+    category: "food",
+    amount: 245,
+    date: getDateOffset(-2),
+    isComped: false,
+  },
+  {
+    id: "bill-15",
+    reservationId: "res-9",
+    description: "Minibar",
+    category: "amenity",
+    amount: 56,
+    date: getDateOffset(-1),
+    isComped: false,
+  },
+  {
+    id: "bill-16",
+    reservationId: "res-9",
+    description: "Champagne (VIP)",
+    category: "amenity",
+    amount: 0,
+    date: getDateOffset(-3),
+    isComped: true,
+  },
 
   // Res-2 (Michael Johnson - Gold)
-  { id: "bill-17", reservationId: "res-2", description: "Room Charge - Queen", category: "room", amount: 159, date: getDateOffset(-1), isComped: false },
-  { id: "bill-18", reservationId: "res-2", description: "Breakfast Buffet", category: "food", amount: 28, date: today, isComped: false },
+  {
+    id: "bill-17",
+    reservationId: "res-2",
+    description: "Room Charge - Queen",
+    category: "room",
+    amount: 159,
+    date: getDateOffset(-1),
+    isComped: false,
+  },
+  {
+    id: "bill-18",
+    reservationId: "res-2",
+    description: "Breakfast Buffet",
+    category: "food",
+    amount: 28,
+    date: today,
+    isComped: false,
+  },
 
   // Res-8 (James Thomas - Silver)
-  { id: "bill-19", reservationId: "res-8", description: "Room Charge - King", category: "room", amount: 189, date: getDateOffset(-1), isComped: false },
-  { id: "bill-20", reservationId: "res-8", description: "Parking - Daily", category: "service", amount: 35, date: getDateOffset(-1), isComped: false },
-  { id: "bill-21", reservationId: "res-8", description: "Laundry Service", category: "service", amount: 45, date: today, isComped: false },
+  {
+    id: "bill-19",
+    reservationId: "res-8",
+    description: "Room Charge - King",
+    category: "room",
+    amount: 189,
+    date: getDateOffset(-1),
+    isComped: false,
+  },
+  {
+    id: "bill-20",
+    reservationId: "res-8",
+    description: "Parking - Daily",
+    category: "service",
+    amount: 35,
+    date: getDateOffset(-1),
+    isComped: false,
+  },
+  {
+    id: "bill-21",
+    reservationId: "res-8",
+    description: "Laundry Service",
+    category: "service",
+    amount: 45,
+    date: today,
+    isComped: false,
+  },
 
   // Res-10 (Karen Lewis - Suite - Gold)
-  { id: "bill-22", reservationId: "res-10", description: "Room Charge - Suite", category: "room", amount: 349, date: getDateOffset(-1), isComped: false },
-  { id: "bill-23", reservationId: "res-10", description: "Room Service - Lunch", category: "food", amount: 56, date: today, isComped: false },
-  { id: "bill-24", reservationId: "res-10", description: "Spa - Massage", category: "service", amount: 120, date: today, isComped: false },
+  {
+    id: "bill-22",
+    reservationId: "res-10",
+    description: "Room Charge - Suite",
+    category: "room",
+    amount: 349,
+    date: getDateOffset(-1),
+    isComped: false,
+  },
+  {
+    id: "bill-23",
+    reservationId: "res-10",
+    description: "Room Service - Lunch",
+    category: "food",
+    amount: 56,
+    date: today,
+    isComped: false,
+  },
+  {
+    id: "bill-24",
+    reservationId: "res-10",
+    description: "Spa - Massage",
+    category: "service",
+    amount: 120,
+    date: today,
+    isComped: false,
+  },
 
   // Other active reservations
-  { id: "bill-25", reservationId: "res-3", description: "Room Charge - Queen", category: "room", amount: 159, date: getDateOffset(-3), isComped: false },
-  { id: "bill-26", reservationId: "res-3", description: "Room Charge - Queen", category: "room", amount: 159, date: getDateOffset(-2), isComped: false },
-  { id: "bill-27", reservationId: "res-3", description: "Room Charge - Queen", category: "room", amount: 159, date: getDateOffset(-1), isComped: false },
+  {
+    id: "bill-25",
+    reservationId: "res-3",
+    description: "Room Charge - Queen",
+    category: "room",
+    amount: 159,
+    date: getDateOffset(-3),
+    isComped: false,
+  },
+  {
+    id: "bill-26",
+    reservationId: "res-3",
+    description: "Room Charge - Queen",
+    category: "room",
+    amount: 159,
+    date: getDateOffset(-2),
+    isComped: false,
+  },
+  {
+    id: "bill-27",
+    reservationId: "res-3",
+    description: "Room Charge - Queen",
+    category: "room",
+    amount: 159,
+    date: getDateOffset(-1),
+    isComped: false,
+  },
 
-  { id: "bill-28", reservationId: "res-4", description: "Room Charge - Queen", category: "room", amount: 159, date: getDateOffset(-1), isComped: false },
+  {
+    id: "bill-28",
+    reservationId: "res-4",
+    description: "Room Charge - Queen",
+    category: "room",
+    amount: 159,
+    date: getDateOffset(-1),
+    isComped: false,
+  },
 
-  { id: "bill-29", reservationId: "res-6", description: "Room Charge - King", category: "room", amount: 189, date: today, isComped: false },
+  {
+    id: "bill-29",
+    reservationId: "res-6",
+    description: "Room Charge - King",
+    category: "room",
+    amount: 189,
+    date: today,
+    isComped: false,
+  },
 
-  { id: "bill-30", reservationId: "res-7", description: "Room Charge - King", category: "room", amount: 189, date: getDateOffset(-4), isComped: false },
-  { id: "bill-31", reservationId: "res-7", description: "Room Charge - King", category: "room", amount: 189, date: getDateOffset(-3), isComped: false },
-  { id: "bill-32", reservationId: "res-7", description: "Room Charge - King", category: "room", amount: 189, date: getDateOffset(-2), isComped: false },
-  { id: "bill-33", reservationId: "res-7", description: "Room Charge - King", category: "room", amount: 189, date: getDateOffset(-1), isComped: false },
+  {
+    id: "bill-30",
+    reservationId: "res-7",
+    description: "Room Charge - King",
+    category: "room",
+    amount: 189,
+    date: getDateOffset(-4),
+    isComped: false,
+  },
+  {
+    id: "bill-31",
+    reservationId: "res-7",
+    description: "Room Charge - King",
+    category: "room",
+    amount: 189,
+    date: getDateOffset(-3),
+    isComped: false,
+  },
+  {
+    id: "bill-32",
+    reservationId: "res-7",
+    description: "Room Charge - King",
+    category: "room",
+    amount: 189,
+    date: getDateOffset(-2),
+    isComped: false,
+  },
+  {
+    id: "bill-33",
+    reservationId: "res-7",
+    description: "Room Charge - King",
+    category: "room",
+    amount: 189,
+    date: getDateOffset(-1),
+    isComped: false,
+  },
 ];
 
 // ============================================================================
@@ -771,25 +1149,134 @@ export const billingItems: BillingItem[] = [
 
 export const housekeepingTasks: HousekeepingTask[] = [
   // Dirty rooms needing cleaning
-  { id: "hk-1", roomNumber: 204, status: "dirty", priority: "normal", assignedTo: "Maria", notes: "Guest checked out at 10am", lastUpdated: today },
-  { id: "hk-2", roomNumber: 208, status: "dirty", priority: "normal", assignedTo: "Carlos", lastUpdated: today },
-  { id: "hk-3", roomNumber: 306, status: "dirty", priority: "rush", assignedTo: "Maria", notes: "VIP arrival at 2pm", lastUpdated: today },
-  { id: "hk-4", roomNumber: 311, status: "dirty", priority: "normal", lastUpdated: today },
-  { id: "hk-5", roomNumber: 405, status: "dirty", priority: "normal", assignedTo: "Ana", lastUpdated: today },
-  { id: "hk-6", roomNumber: 213, status: "dirty", priority: "rush", notes: "Early arrival confirmed", lastUpdated: today },
+  {
+    id: "hk-1",
+    roomNumber: 204,
+    status: "dirty",
+    priority: "normal",
+    assignedTo: "Maria",
+    notes: "Guest checked out at 10am",
+    lastUpdated: today,
+  },
+  {
+    id: "hk-2",
+    roomNumber: 208,
+    status: "dirty",
+    priority: "normal",
+    assignedTo: "Carlos",
+    lastUpdated: today,
+  },
+  {
+    id: "hk-3",
+    roomNumber: 306,
+    status: "dirty",
+    priority: "rush",
+    assignedTo: "Maria",
+    notes: "VIP arrival at 2pm",
+    lastUpdated: today,
+  },
+  {
+    id: "hk-4",
+    roomNumber: 311,
+    status: "dirty",
+    priority: "normal",
+    lastUpdated: today,
+  },
+  {
+    id: "hk-5",
+    roomNumber: 405,
+    status: "dirty",
+    priority: "normal",
+    assignedTo: "Ana",
+    lastUpdated: today,
+  },
+  {
+    id: "hk-6",
+    roomNumber: 213,
+    status: "dirty",
+    priority: "rush",
+    notes: "Early arrival confirmed",
+    lastUpdated: today,
+  },
 
   // In progress
-  { id: "hk-7", roomNumber: 302, status: "in_progress", priority: "normal", assignedTo: "Carlos", lastUpdated: today },
-  { id: "hk-8", roomNumber: 309, status: "in_progress", priority: "rush", assignedTo: "Ana", notes: "Platinum member arriving", lastUpdated: today },
-  { id: "hk-9", roomNumber: 502, status: "in_progress", priority: "normal", assignedTo: "Maria", notes: "Deep clean scheduled", lastUpdated: today },
+  {
+    id: "hk-7",
+    roomNumber: 302,
+    status: "in_progress",
+    priority: "normal",
+    assignedTo: "Carlos",
+    lastUpdated: today,
+  },
+  {
+    id: "hk-8",
+    roomNumber: 309,
+    status: "in_progress",
+    priority: "rush",
+    assignedTo: "Ana",
+    notes: "Platinum member arriving",
+    lastUpdated: today,
+  },
+  {
+    id: "hk-9",
+    roomNumber: 502,
+    status: "in_progress",
+    priority: "normal",
+    assignedTo: "Maria",
+    notes: "Deep clean scheduled",
+    lastUpdated: today,
+  },
 
   // Ready (recently cleaned)
-  { id: "hk-10", roomNumber: 202, status: "ready", priority: "normal", assignedTo: "Carlos", lastUpdated: today },
-  { id: "hk-11", roomNumber: 205, status: "ready", priority: "normal", assignedTo: "Ana", lastUpdated: today },
-  { id: "hk-12", roomNumber: 207, status: "ready", priority: "normal", assignedTo: "Maria", lastUpdated: today },
-  { id: "hk-13", roomNumber: 305, status: "ready", priority: "normal", assignedTo: "Carlos", lastUpdated: today },
-  { id: "hk-14", roomNumber: 313, status: "ready", priority: "normal", assignedTo: "Ana", lastUpdated: today },
-  { id: "hk-15", roomNumber: 505, status: "ready", priority: "normal", assignedTo: "Maria", notes: "Suite - extra attention", lastUpdated: today },
+  {
+    id: "hk-10",
+    roomNumber: 202,
+    status: "ready",
+    priority: "normal",
+    assignedTo: "Carlos",
+    lastUpdated: today,
+  },
+  {
+    id: "hk-11",
+    roomNumber: 205,
+    status: "ready",
+    priority: "normal",
+    assignedTo: "Ana",
+    lastUpdated: today,
+  },
+  {
+    id: "hk-12",
+    roomNumber: 207,
+    status: "ready",
+    priority: "normal",
+    assignedTo: "Maria",
+    lastUpdated: today,
+  },
+  {
+    id: "hk-13",
+    roomNumber: 305,
+    status: "ready",
+    priority: "normal",
+    assignedTo: "Carlos",
+    lastUpdated: today,
+  },
+  {
+    id: "hk-14",
+    roomNumber: 313,
+    status: "ready",
+    priority: "normal",
+    assignedTo: "Ana",
+    lastUpdated: today,
+  },
+  {
+    id: "hk-15",
+    roomNumber: 505,
+    status: "ready",
+    priority: "normal",
+    assignedTo: "Maria",
+    notes: "Suite - extra attention",
+    lastUpdated: today,
+  },
 ];
 
 // ============================================================================
@@ -799,7 +1286,11 @@ export const housekeepingTasks: HousekeepingTask[] = [
 function generateRoomRates(): RoomRate[] {
   const rates: RoomRate[] = [];
   const roomTypes: RoomType[] = ["King", "Queen", "Suite"];
-  const baseRates: Record<RoomType, number> = { King: 189, Queen: 159, Suite: 349 };
+  const baseRates: Record<RoomType, number> = {
+    King: 189,
+    Queen: 159,
+    Suite: 349,
+  };
 
   const competitors = [
     { name: "Marriott Downtown", multiplier: 0.95 },
@@ -819,14 +1310,16 @@ function generateRoomRates(): RoomRate[] {
 
     for (const roomType of roomTypes) {
       const baseRate = baseRates[roomType];
-      const rate = Math.round(baseRate * weekendMultiplier * historicalMultiplier);
+      const rate = Math.round(
+        baseRate * weekendMultiplier * historicalMultiplier,
+      );
 
       rates.push({
         id: `rate-${roomType}-${date}`,
         roomType,
         date,
         rate,
-        competitorRates: competitors.map(c => ({
+        competitorRates: competitors.map((c) => ({
           name: c.name,
           rate: Math.round(rate * c.multiplier),
         })),
@@ -931,17 +1424,20 @@ function generateHistoricalOccupancy(): OccupancyData[] {
   return data;
 }
 
-export const historicalOccupancy: OccupancyData[] = generateHistoricalOccupancy();
+export const historicalOccupancy: OccupancyData[] =
+  generateHistoricalOccupancy();
 
 // ============================================================================
 // Helper function to get guest by ID
 // ============================================================================
 
 export function getGuestById(guestId: string): Guest | undefined {
-  return guests.find(g => g.id === guestId);
+  return guests.find((g) => g.id === guestId);
 }
 
-export function getReservationWithGuest(reservation: Reservation): Reservation & { guest: Guest } {
+export function getReservationWithGuest(
+  reservation: Reservation,
+): Reservation & { guest: Guest } {
   const guest = getGuestById(reservation.guestId);
   if (!guest) {
     throw new Error(`Guest not found for reservation ${reservation.id}`);
@@ -950,17 +1446,22 @@ export function getReservationWithGuest(reservation: Reservation): Reservation &
 }
 
 export function getRoomByNumber(roomNumber: number): Room | undefined {
-  return rooms.find(r => r.number === roomNumber);
+  return rooms.find((r) => r.number === roomNumber);
 }
 
 export function getBillingForReservation(reservationId: string): BillingItem[] {
-  return billingItems.filter(b => b.reservationId === reservationId);
+  return billingItems.filter((b) => b.reservationId === reservationId);
 }
 
-export function getHousekeepingForRoom(roomNumber: number): HousekeepingTask | undefined {
-  return housekeepingTasks.find(t => t.roomNumber === roomNumber);
+export function getHousekeepingForRoom(
+  roomNumber: number,
+): HousekeepingTask | undefined {
+  return housekeepingTasks.find((t) => t.roomNumber === roomNumber);
 }
 
-export function getRateForRoomType(roomType: RoomType, date: string): RoomRate | undefined {
-  return roomRates.find(r => r.roomType === roomType && r.date === date);
+export function getRateForRoomType(
+  roomType: RoomType,
+  date: string,
+): RoomRate | undefined {
+  return roomRates.find((r) => r.roomType === roomType && r.date === date);
 }

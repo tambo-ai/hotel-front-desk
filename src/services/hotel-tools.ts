@@ -36,7 +36,9 @@ import type {
 // Search & Navigation Tools
 // ============================================================================
 
-export function searchReservations(args: SearchReservationsArgs): Reservation[] {
+export function searchReservations(
+  args: SearchReservationsArgs,
+): Reservation[] {
   const context = getHotelContextRef();
   const allReservations = context?.state.reservations || reservations;
 
@@ -57,7 +59,7 @@ export function searchReservations(args: SearchReservationsArgs): Reservation[] 
   if (args.confirmationNumber) {
     const confNum = args.confirmationNumber.toUpperCase();
     results = results.filter((res) =>
-      res.confirmationNumber.toUpperCase().includes(confNum)
+      res.confirmationNumber.toUpperCase().includes(confNum),
     );
   }
 
@@ -82,7 +84,8 @@ export function searchReservations(args: SearchReservationsArgs): Reservation[] 
     }
 
     results = results.filter(
-      (res) => res.checkInDate === targetDate || res.checkOutDate === targetDate
+      (res) =>
+        res.checkInDate === targetDate || res.checkOutDate === targetDate,
     );
   }
 
@@ -109,7 +112,9 @@ export function getReservationDetails(args: { reservationId: string }) {
   }
 
   const guest = getGuestById(reservation.guestId);
-  const billing = billingItems.filter((b) => b.reservationId === reservation.id);
+  const billing = billingItems.filter(
+    (b) => b.reservationId === reservation.id,
+  );
 
   // Select and navigate to reservation
   if (context) {
@@ -121,7 +126,10 @@ export function getReservationDetails(args: { reservationId: string }) {
     reservation,
     guest,
     billing,
-    total: billing.reduce((sum, item) => sum + (item.isComped ? 0 : item.amount), 0),
+    total: billing.reduce(
+      (sum, item) => sum + (item.isComped ? 0 : item.amount),
+      0,
+    ),
   };
 }
 
@@ -130,7 +138,7 @@ export function getAvailableRooms(args: GetAvailableRoomsArgs): Room[] {
   const allRooms = context?.state.rooms || rooms;
 
   let available = allRooms.filter(
-    (r) => r.status === "available" || r.status === "clean"
+    (r) => r.status === "available" || r.status === "clean",
   );
 
   if (args.type) {
@@ -139,7 +147,7 @@ export function getAvailableRooms(args: GetAvailableRoomsArgs): Room[] {
 
   if (args.features && args.features.length > 0) {
     available = available.filter((r) =>
-      args.features!.every((f) => r.features.includes(f))
+      args.features!.every((f) => r.features.includes(f)),
     );
   }
 
@@ -202,15 +210,24 @@ export function stageRoomAssignment(args: StageRoomAssignmentArgs) {
   }
 
   if (room.status !== "available" && room.status !== "clean") {
-    return { success: false, error: `Room ${args.roomNumber} is not available (status: ${room.status})` };
+    return {
+      success: false,
+      error: `Room ${args.roomNumber} is not available (status: ${room.status})`,
+    };
   }
 
-  const reservation = context.state.reservations.find((r) => r.id === args.reservationId);
+  const reservation = context.state.reservations.find(
+    (r) => r.id === args.reservationId,
+  );
   if (!reservation) {
     return { success: false, error: "Reservation not found" };
   }
 
-  context.stageRoomAssignment(args.reservationId, args.roomNumber, reservation.roomNumber);
+  context.stageRoomAssignment(
+    args.reservationId,
+    args.roomNumber,
+    reservation.roomNumber,
+  );
   context.highlightRooms([args.roomNumber]);
 
   return {
@@ -230,13 +247,15 @@ export function stageBillingAdjustment(args: StageBillingAdjustmentArgs) {
     return { success: false, error: "Context not available" };
   }
 
-  const reservation = context.state.reservations.find((r) => r.id === args.reservationId);
+  const reservation = context.state.reservations.find(
+    (r) => r.id === args.reservationId,
+  );
   if (!reservation) {
     return { success: false, error: "Reservation not found" };
   }
 
   const currentBilling = context.state.billingItems.filter(
-    (b) => b.reservationId === args.reservationId
+    (b) => b.reservationId === args.reservationId,
   );
 
   if (args.action === "remove") {
@@ -249,7 +268,7 @@ export function stageBillingAdjustment(args: StageBillingAdjustmentArgs) {
       // Fuzzy match by description
       const searchTerm = args.item.toLowerCase();
       itemToRemove = currentBilling.find((b) =>
-        b.description.toLowerCase().includes(searchTerm)
+        b.description.toLowerCase().includes(searchTerm),
       );
     }
 
@@ -329,7 +348,12 @@ export function stageRoomStatusChange(args: StageRoomStatusChangeArgs) {
     return { success: false, error: "Room not found" };
   }
 
-  context.stageRoomStatusChange(args.roomNumber, args.status, room.status, args.reason);
+  context.stageRoomStatusChange(
+    args.roomNumber,
+    args.status,
+    room.status,
+    args.reason,
+  );
   context.highlightRooms([args.roomNumber]);
 
   return {
@@ -349,7 +373,7 @@ export function stageRateChange(args: StageRateChangeArgs) {
   }
 
   const currentRate = roomRates.find(
-    (r) => r.roomType === args.roomType && r.date === args.date
+    (r) => r.roomType === args.roomType && r.date === args.date,
   );
 
   const previousRate = currentRate?.rate || 0;
@@ -360,7 +384,7 @@ export function stageRateChange(args: StageRateChangeArgs) {
   const affectedRooms = context.state.rooms.filter(
     (r) =>
       r.type === args.roomType &&
-      (r.status === "available" || r.status === "clean")
+      (r.status === "available" || r.status === "clean"),
   ).length;
 
   return {
@@ -403,7 +427,9 @@ export function getOccupancyData(args: GetOccupancyDataArgs): OccupancyData[] {
       return date >= monthAgo && date <= today;
     });
   } else if (args.range === "custom" && args.startDate && args.endDate) {
-    data = data.filter((d) => d.date >= args.startDate! && d.date <= args.endDate!);
+    data = data.filter(
+      (d) => d.date >= args.startDate! && d.date <= args.endDate!,
+    );
   }
 
   // Navigate to reports view
@@ -416,7 +442,9 @@ export function getOccupancyData(args: GetOccupancyDataArgs): OccupancyData[] {
 
 export function getCompetitorRates(args: GetCompetitorRatesArgs) {
   const rate = roomRates.find(
-    (r) => r.date === args.date && (args.roomType ? r.roomType === args.roomType : true)
+    (r) =>
+      r.date === args.date &&
+      (args.roomType ? r.roomType === args.roomType : true),
   );
 
   if (!rate?.competitorRates) {
@@ -430,7 +458,9 @@ export function getCompetitorRates(args: GetCompetitorRatesArgs) {
   }));
 }
 
-export function getHistoricalOccupancy(args: GetHistoricalOccupancyArgs): OccupancyData[] {
+export function getHistoricalOccupancy(
+  args: GetHistoricalOccupancyArgs,
+): OccupancyData[] {
   if (args.date === "last_year_same_weekend") {
     return historicalOccupancy;
   }
@@ -448,7 +478,7 @@ export function getRoomTypeAvailability(args: GetRoomTypeAvailabilityArgs) {
   return roomTypes.map((type) => {
     const roomsOfType = allRooms.filter((r) => r.type === type);
     const available = roomsOfType.filter(
-      (r) => r.status === "available" || r.status === "clean"
+      (r) => r.status === "available" || r.status === "clean",
     ).length;
 
     return {
@@ -469,7 +499,7 @@ export function getForwardBookings(args: GetForwardBookingsArgs) {
       r.roomType === args.roomType &&
       r.checkInDate <= args.date &&
       r.checkOutDate > args.date &&
-      r.status !== "cancelled"
+      r.status !== "cancelled",
   );
 
   return {
@@ -485,7 +515,9 @@ export function getForwardBookings(args: GetForwardBookingsArgs) {
   };
 }
 
-export function calculateRevenueProjection(args: CalculateRevenueProjectionArgs) {
+export function calculateRevenueProjection(
+  args: CalculateRevenueProjectionArgs,
+) {
   const context = getHotelContextRef();
   const allRooms = context?.state.rooms || rooms;
 
@@ -493,14 +525,15 @@ export function calculateRevenueProjection(args: CalculateRevenueProjectionArgs)
   const availableCount = allRooms.filter(
     (r) =>
       r.type === args.roomType &&
-      (r.status === "available" || r.status === "clean")
+      (r.status === "available" || r.status === "clean"),
   ).length;
 
   // Simple projection model:
   // - Lower rates = more bookings
   // - Estimate conversion based on rate vs competitor
   const rateDiff = args.currentRate - args.newRate;
-  const conversionBoost = rateDiff > 0 ? Math.min(rateDiff / 10 * 0.15, 0.5) : 0;
+  const conversionBoost =
+    rateDiff > 0 ? Math.min((rateDiff / 10) * 0.15, 0.5) : 0;
 
   const currentOccupancy = 0.65; // Base occupancy from our data
   const projectedOccupancy = Math.min(currentOccupancy + conversionBoost, 0.95);
@@ -545,20 +578,26 @@ export function draftGuestMessage(args: DraftGuestMessageArgs) {
     case "welcome":
       subject = `Welcome to Grand Hotel, ${guest.firstName}!`;
       body = `${greeting}\n\nWelcome to Grand Hotel! We are delighted to have you as our guest${
-        guest.loyaltyTier !== "Member" ? ` and valued ${guest.loyaltyTier} member` : ""
+        guest.loyaltyTier !== "Member"
+          ? ` and valued ${guest.loyaltyTier} member`
+          : ""
       }.\n\nIf there is anything we can do to make your stay more comfortable, please don't hesitate to contact the front desk.${signature}`;
       break;
 
     case "apology":
       subject = "Our Sincere Apologies - Grand Hotel";
       body = `${greeting}\n\nWe sincerely apologize for any inconvenience you may have experienced during your stay with us.${
-        args.context ? `\n\nRegarding ${args.context}, we understand this was not the experience you expected.` : ""
+        args.context
+          ? `\n\nRegarding ${args.context}, we understand this was not the experience you expected.`
+          : ""
       }${
         args.offer
           ? `\n\nAs a gesture of our commitment to your satisfaction, we would like to offer you ${args.offer.replace(/_/g, " ")}.`
           : ""
       }\n\nYour comfort and satisfaction are our top priorities, and we truly value your patronage${
-        guest.loyaltyTier !== "Member" ? ` as a ${guest.loyaltyTier} member` : ""
+        guest.loyaltyTier !== "Member"
+          ? ` as a ${guest.loyaltyTier} member`
+          : ""
       }.${signature}`;
       break;
 
@@ -609,7 +648,8 @@ export function draftRevenueReport(args: DraftRevenueReportArgs) {
   // Add occupancy summary
   const recentOccupancy = occupancyData.slice(-7);
   const avgOccupancy = Math.round(
-    recentOccupancy.reduce((sum, d) => sum + d.occupancyRate, 0) / recentOccupancy.length
+    recentOccupancy.reduce((sum, d) => sum + d.occupancyRate, 0) /
+      recentOccupancy.length,
   );
   const totalRevenue = recentOccupancy.reduce((sum, d) => sum + d.revenue, 0);
 
@@ -661,13 +701,18 @@ export function completeCheckIn(args: { reservationId: string }) {
     return { success: false, error: "Context not available" };
   }
 
-  const reservation = context.state.reservations.find(r => r.id === args.reservationId);
+  const reservation = context.state.reservations.find(
+    (r) => r.id === args.reservationId,
+  );
   if (!reservation) {
     return { success: false, error: "Reservation not found" };
   }
 
   if (reservation.status !== "confirmed") {
-    return { success: false, error: `Cannot check in - reservation status is ${reservation.status}` };
+    return {
+      success: false,
+      error: `Cannot check in - reservation status is ${reservation.status}`,
+    };
   }
 
   // Start check-in if not already started
@@ -690,19 +735,23 @@ export function commitReservationChanges(args: { reservationId: string }) {
     return { success: false, error: "Context not available" };
   }
 
-  const reservation = context.state.reservations.find(r => r.id === args.reservationId);
+  const reservation = context.state.reservations.find(
+    (r) => r.id === args.reservationId,
+  );
   if (!reservation) {
     return { success: false, error: "Reservation not found" };
   }
 
   // Commit room assignment if staged
-  if (context.state.stagedRoomAssignment?.reservationId === args.reservationId) {
+  if (
+    context.state.stagedRoomAssignment?.reservationId === args.reservationId
+  ) {
     context.commitRoomAssignment();
   }
 
   // Commit billing changes for this reservation
   const hasBillingChanges = context.state.stagedBillingChanges.some(
-    c => c.reservationId === args.reservationId
+    (c) => c.reservationId === args.reservationId,
   );
   if (hasBillingChanges) {
     context.commitBillingChanges();
@@ -741,7 +790,10 @@ export function commitHousekeepingChange(args: { roomNumber: number }) {
 
   const stagedChange = context.state.stagedHousekeepingChange;
   if (!stagedChange || stagedChange.roomNumber !== args.roomNumber) {
-    return { success: false, error: "No staged housekeeping change for this room" };
+    return {
+      success: false,
+      error: "No staged housekeeping change for this room",
+    };
   }
 
   context.commitHousekeepingChange();
@@ -759,8 +811,15 @@ export function commitRateChange(args: { roomType: string; date: string }) {
   }
 
   const stagedChange = context.state.stagedRateChange;
-  if (!stagedChange || stagedChange.roomType !== args.roomType || stagedChange.date !== args.date) {
-    return { success: false, error: "No staged rate change matching these parameters" };
+  if (
+    !stagedChange ||
+    stagedChange.roomType !== args.roomType ||
+    stagedChange.date !== args.date
+  ) {
+    return {
+      success: false,
+      error: "No staged rate change matching these parameters",
+    };
   }
 
   context.commitRateChange();
@@ -786,9 +845,14 @@ export function stageHousekeepingUpdate(args: {
     return { success: false, error: "Context not available" };
   }
 
-  const task = context.state.housekeepingTasks.find(t => t.roomNumber === args.roomNumber);
+  const task = context.state.housekeepingTasks.find(
+    (t) => t.roomNumber === args.roomNumber,
+  );
   if (!task) {
-    return { success: false, error: `No housekeeping task found for room ${args.roomNumber}` };
+    return {
+      success: false,
+      error: `No housekeeping task found for room ${args.roomNumber}`,
+    };
   }
 
   context.stageHousekeepingChange(args.roomNumber, {
@@ -823,22 +887,22 @@ export function getEarlyCheckouts() {
 
   const today = new Date().toISOString().split("T")[0];
   const departures = context.state.reservations.filter(
-    r => r.checkOutDate === today && r.status === "checked_in"
+    (r) => r.checkOutDate === today && r.status === "checked_in",
   );
 
   // Filter to early checkouts (those marked or before scheduled time)
-  const earlyCheckouts = departures.filter(r => r.isEarlyCheckout === true);
+  const earlyCheckouts = departures.filter((r) => r.isEarlyCheckout === true);
 
   // Navigate to departures view
   context.navigateTo("reservations");
   if (earlyCheckouts.length > 0) {
-    context.highlightReservations(earlyCheckouts.map(r => r.id));
+    context.highlightReservations(earlyCheckouts.map((r) => r.id));
   }
 
   return {
     count: earlyCheckouts.length,
     totalDepartures: departures.length,
-    checkouts: earlyCheckouts.map(r => ({
+    checkouts: earlyCheckouts.map((r) => ({
       id: r.id,
       confirmationNumber: r.confirmationNumber,
       guestId: r.guestId,
@@ -858,7 +922,7 @@ export function getGuestByRoom(args: { roomNumber: number }) {
     return { error: "Context not available" };
   }
 
-  const room = context.state.rooms.find(r => r.number === args.roomNumber);
+  const room = context.state.rooms.find((r) => r.number === args.roomNumber);
   if (!room) {
     return { error: `Room ${args.roomNumber} not found` };
   }
@@ -870,14 +934,17 @@ export function getGuestByRoom(args: { roomNumber: number }) {
     };
   }
 
-  const guest = guests.find(g => g.id === room.currentGuestId);
+  const guest = guests.find((g) => g.id === room.currentGuestId);
   if (!guest) {
     return { error: "Guest not found" };
   }
 
   // Find the current reservation
   const reservation = context.state.reservations.find(
-    r => r.guestId === guest.id && r.roomNumber === args.roomNumber && r.status === "checked_in"
+    (r) =>
+      r.guestId === guest.id &&
+      r.roomNumber === args.roomNumber &&
+      r.status === "checked_in",
   );
 
   // Navigate and select
@@ -903,22 +970,28 @@ export function initiateKeyGeneration(args: {
     return { success: false, error: "Context not available" };
   }
 
-  const room = context.state.rooms.find(r => r.number === args.roomNumber);
+  const room = context.state.rooms.find((r) => r.number === args.roomNumber);
   if (!room) {
     return { success: false, error: `Room ${args.roomNumber} not found` };
   }
 
-  const guest = guests.find(g => g.id === args.guestId);
+  const guest = guests.find((g) => g.id === args.guestId);
   if (!guest) {
     return { success: false, error: "Guest not found" };
   }
 
   const reservation = context.state.reservations.find(
-    r => r.guestId === args.guestId && r.roomNumber === args.roomNumber && r.status === "checked_in"
+    (r) =>
+      r.guestId === args.guestId &&
+      r.roomNumber === args.roomNumber &&
+      r.status === "checked_in",
   );
 
   if (!reservation) {
-    return { success: false, error: "No active reservation found for this guest and room" };
+    return {
+      success: false,
+      error: "No active reservation found for this guest and room",
+    };
   }
 
   const keyCount = args.keyCount || 2;

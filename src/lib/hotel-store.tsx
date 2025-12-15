@@ -1,6 +1,12 @@
 "use client";
 
-import React, { createContext, useContext, useReducer, useCallback, ReactNode } from "react";
+import React, {
+  createContext,
+  useContext,
+  useReducer,
+  useCallback,
+  ReactNode,
+} from "react";
 import type {
   ViewType,
   RoomType,
@@ -110,7 +116,10 @@ type HotelAction =
   | { type: "ADD_BILLING_ITEM"; item: BillingItem }
   | { type: "REMOVE_BILLING_ITEM"; itemId: string }
   | { type: "UPDATE_HOUSEKEEPING_TASK"; task: HousekeepingTask }
-  | { type: "SET_DRAFT_MESSAGE"; message: { to: string; subject: string; body: string } | null }
+  | {
+      type: "SET_DRAFT_MESSAGE";
+      message: { to: string; subject: string; body: string } | null;
+    }
   | { type: "CLEAR_DRAFT_MESSAGE" }
   | { type: "STAGE_HOUSEKEEPING_CHANGE"; change: StagedHousekeepingChange }
   | { type: "CLEAR_STAGED_HOUSEKEEPING_CHANGE" }
@@ -123,7 +132,10 @@ type HotelAction =
 // Reducer
 // ============================================================================
 
-function hotelReducer(state: FullHotelState, action: HotelAction): FullHotelState {
+function hotelReducer(
+  state: FullHotelState,
+  action: HotelAction,
+): FullHotelState {
   switch (action.type) {
     case "SET_VIEW":
       return { ...state, currentView: action.view };
@@ -177,7 +189,11 @@ function hotelReducer(state: FullHotelState, action: HotelAction): FullHotelStat
       return { ...state, highlightedReservationIds: action.reservationIds };
 
     case "CLEAR_HIGHLIGHTS":
-      return { ...state, highlightedRoomNumbers: [], highlightedReservationIds: [] };
+      return {
+        ...state,
+        highlightedRoomNumbers: [],
+        highlightedReservationIds: [],
+      };
 
     case "START_CHECK_IN":
       return {
@@ -189,7 +205,9 @@ function hotelReducer(state: FullHotelState, action: HotelAction): FullHotelStat
     case "COMPLETE_CHECK_IN": {
       if (!state.checkInReservationId) return state;
 
-      const reservation = state.reservations.find(r => r.id === state.checkInReservationId);
+      const reservation = state.reservations.find(
+        (r) => r.id === state.checkInReservationId,
+      );
       if (!reservation) return state;
 
       // Apply staged room assignment if any
@@ -197,19 +215,29 @@ function hotelReducer(state: FullHotelState, action: HotelAction): FullHotelStat
       let updatedRooms = state.rooms;
 
       if (state.stagedRoomAssignment) {
-        updatedReservations = state.reservations.map(r =>
+        updatedReservations = state.reservations.map((r) =>
           r.id === state.checkInReservationId
-            ? { ...r, roomNumber: state.stagedRoomAssignment!.newRoom, status: "checked_in" as const }
-            : r
+            ? {
+                ...r,
+                roomNumber: state.stagedRoomAssignment!.newRoom,
+                status: "checked_in" as const,
+              }
+            : r,
         );
-        updatedRooms = state.rooms.map(room =>
+        updatedRooms = state.rooms.map((room) =>
           room.number === state.stagedRoomAssignment!.newRoom
-            ? { ...room, status: "occupied" as const, currentGuestId: reservation.guestId }
-            : room
+            ? {
+                ...room,
+                status: "occupied" as const,
+                currentGuestId: reservation.guestId,
+              }
+            : room,
         );
       } else {
-        updatedReservations = state.reservations.map(r =>
-          r.id === state.checkInReservationId ? { ...r, status: "checked_in" as const } : r
+        updatedReservations = state.reservations.map((r) =>
+          r.id === state.checkInReservationId
+            ? { ...r, status: "checked_in" as const }
+            : r,
         );
       }
 
@@ -219,7 +247,7 @@ function hotelReducer(state: FullHotelState, action: HotelAction): FullHotelStat
         if (change.type === "add" && change.item) {
           updatedBilling = [...updatedBilling, change.item];
         } else if (change.type === "remove" && change.itemId) {
-          updatedBilling = updatedBilling.filter(b => b.id !== change.itemId);
+          updatedBilling = updatedBilling.filter((b) => b.id !== change.itemId);
         }
       }
 
@@ -247,31 +275,38 @@ function hotelReducer(state: FullHotelState, action: HotelAction): FullHotelStat
     case "COMMIT_ROOM_ASSIGNMENT": {
       if (!state.stagedRoomAssignment) return state;
 
-      const { reservationId, newRoom, previousRoom } = state.stagedRoomAssignment;
+      const { reservationId, newRoom, previousRoom } =
+        state.stagedRoomAssignment;
 
       // Update reservation
-      const updatedReservations = state.reservations.map(r =>
-        r.id === reservationId ? { ...r, roomNumber: newRoom } : r
+      const updatedReservations = state.reservations.map((r) =>
+        r.id === reservationId ? { ...r, roomNumber: newRoom } : r,
       );
 
       // Update room statuses
-      const reservation = state.reservations.find(r => r.id === reservationId);
+      const reservation = state.reservations.find(
+        (r) => r.id === reservationId,
+      );
       let updatedRooms = state.rooms;
 
       if (previousRoom) {
         // Clear old room
-        updatedRooms = updatedRooms.map(room =>
+        updatedRooms = updatedRooms.map((room) =>
           room.number === previousRoom
             ? { ...room, status: "dirty" as const, currentGuestId: undefined }
-            : room
+            : room,
         );
       }
 
       // Assign new room
-      updatedRooms = updatedRooms.map(room =>
+      updatedRooms = updatedRooms.map((room) =>
         room.number === newRoom
-          ? { ...room, status: "occupied" as const, currentGuestId: reservation?.guestId }
-          : room
+          ? {
+              ...room,
+              status: "occupied" as const,
+              currentGuestId: reservation?.guestId,
+            }
+          : room,
       );
 
       return {
@@ -289,12 +324,16 @@ function hotelReducer(state: FullHotelState, action: HotelAction): FullHotelStat
         if (change.type === "add" && change.item) {
           updatedBilling = [...updatedBilling, change.item];
         } else if (change.type === "remove" && change.itemId) {
-          updatedBilling = updatedBilling.filter(b => b.id !== change.itemId);
-        } else if (change.type === "discount" && change.itemId && change.discountPercent) {
-          updatedBilling = updatedBilling.map(b =>
+          updatedBilling = updatedBilling.filter((b) => b.id !== change.itemId);
+        } else if (
+          change.type === "discount" &&
+          change.itemId &&
+          change.discountPercent
+        ) {
+          updatedBilling = updatedBilling.map((b) =>
             b.id === change.itemId
               ? { ...b, amount: b.amount * (1 - change.discountPercent! / 100) }
-              : b
+              : b,
           );
         }
       }
@@ -310,8 +349,8 @@ function hotelReducer(state: FullHotelState, action: HotelAction): FullHotelStat
       if (!state.stagedRoomStatusChange) return state;
 
       const { roomNumber, newStatus } = state.stagedRoomStatusChange;
-      const updatedRooms = state.rooms.map(room =>
-        room.number === roomNumber ? { ...room, status: newStatus } : room
+      const updatedRooms = state.rooms.map((room) =>
+        room.number === roomNumber ? { ...room, status: newStatus } : room,
       );
 
       return {
@@ -325,8 +364,10 @@ function hotelReducer(state: FullHotelState, action: HotelAction): FullHotelStat
       if (!state.stagedRateChange) return state;
 
       const { roomType, date, newRate } = state.stagedRateChange;
-      const updatedRates = state.roomRates.map(rate =>
-        rate.roomType === roomType && rate.date === date ? { ...rate, rate: newRate } : rate
+      const updatedRates = state.roomRates.map((rate) =>
+        rate.roomType === roomType && rate.date === date
+          ? { ...rate, rate: newRate }
+          : rate,
       );
 
       return {
@@ -339,14 +380,16 @@ function hotelReducer(state: FullHotelState, action: HotelAction): FullHotelStat
     case "UPDATE_ROOM":
       return {
         ...state,
-        rooms: state.rooms.map(r => (r.id === action.room.id ? action.room : r)),
+        rooms: state.rooms.map((r) =>
+          r.id === action.room.id ? action.room : r,
+        ),
       };
 
     case "UPDATE_RESERVATION":
       return {
         ...state,
-        reservations: state.reservations.map(r =>
-          r.id === action.reservation.id ? action.reservation : r
+        reservations: state.reservations.map((r) =>
+          r.id === action.reservation.id ? action.reservation : r,
         ),
       };
 
@@ -359,14 +402,14 @@ function hotelReducer(state: FullHotelState, action: HotelAction): FullHotelStat
     case "REMOVE_BILLING_ITEM":
       return {
         ...state,
-        billingItems: state.billingItems.filter(b => b.id !== action.itemId),
+        billingItems: state.billingItems.filter((b) => b.id !== action.itemId),
       };
 
     case "UPDATE_HOUSEKEEPING_TASK":
       return {
         ...state,
-        housekeepingTasks: state.housekeepingTasks.map(t =>
-          t.id === action.task.id ? action.task : t
+        housekeepingTasks: state.housekeepingTasks.map((t) =>
+          t.id === action.task.id ? action.task : t,
         ),
       };
 
@@ -385,8 +428,9 @@ function hotelReducer(state: FullHotelState, action: HotelAction): FullHotelStat
     case "COMMIT_HOUSEKEEPING_CHANGE": {
       if (!state.stagedHousekeepingChange) return state;
 
-      const { roomNumber, priority, status, notes } = state.stagedHousekeepingChange;
-      const updatedTasks = state.housekeepingTasks.map(task =>
+      const { roomNumber, priority, status, notes } =
+        state.stagedHousekeepingChange;
+      const updatedTasks = state.housekeepingTasks.map((task) =>
         task.roomNumber === roomNumber
           ? {
               ...task,
@@ -394,7 +438,7 @@ function hotelReducer(state: FullHotelState, action: HotelAction): FullHotelStat
               status: status || task.status,
               notes: notes || task.notes,
             }
-          : task
+          : task,
       );
 
       return {
@@ -432,10 +476,24 @@ interface HotelContextValue {
   selectGuest: (guestId: string | null) => void;
   setRoomFilter: (filter: HotelState["roomFilter"]) => void;
   setReservationFilter: (filter: HotelState["reservationFilter"]) => void;
-  stageRoomAssignment: (reservationId: string, roomNumber: number, previousRoom?: number) => void;
+  stageRoomAssignment: (
+    reservationId: string,
+    roomNumber: number,
+    previousRoom?: number,
+  ) => void;
   stageBillingChange: (change: StagedBillingChange) => void;
-  stageRoomStatusChange: (roomNumber: number, newStatus: RoomStatus, previousStatus: RoomStatus, reason?: string) => void;
-  stageRateChange: (roomType: RoomType, date: string, newRate: number, previousRate: number) => void;
+  stageRoomStatusChange: (
+    roomNumber: number,
+    newStatus: RoomStatus,
+    previousStatus: RoomStatus,
+    reason?: string,
+  ) => void;
+  stageRateChange: (
+    roomType: RoomType,
+    date: string,
+    newRate: number,
+    previousRate: number,
+  ) => void;
   highlightRooms: (roomNumbers: number[]) => void;
   highlightReservations: (reservationIds: string[]) => void;
   clearHighlights: () => void;
@@ -446,11 +504,16 @@ interface HotelContextValue {
   commitBillingChanges: () => void;
   commitRoomStatusChange: () => void;
   commitRateChange: () => void;
-  stageHousekeepingChange: (roomNumber: number, changes: Omit<StagedHousekeepingChange, "roomNumber">) => void;
+  stageHousekeepingChange: (
+    roomNumber: number,
+    changes: Omit<StagedHousekeepingChange, "roomNumber">,
+  ) => void;
   commitHousekeepingChange: () => void;
   initiateKeyGeneration: (data: KeyGenerationData) => void;
   clearKeyGenerationData: () => void;
-  setDraftMessage: (message: { to: string; subject: string; body: string } | null) => void;
+  setDraftMessage: (
+    message: { to: string; subject: string; body: string } | null,
+  ) => void;
   clearDraftMessage: () => void;
   resetState: () => void;
   // Data getters
@@ -491,9 +554,12 @@ export function HotelProvider({ children }: { children: ReactNode }) {
     dispatch({ type: "SET_ROOM_FILTER", filter });
   }, []);
 
-  const setReservationFilter = useCallback((filter: HotelState["reservationFilter"]) => {
-    dispatch({ type: "SET_RESERVATION_FILTER", filter });
-  }, []);
+  const setReservationFilter = useCallback(
+    (filter: HotelState["reservationFilter"]) => {
+      dispatch({ type: "SET_RESERVATION_FILTER", filter });
+    },
+    [],
+  );
 
   const stageRoomAssignment = useCallback(
     (reservationId: string, roomNumber: number, previousRoom?: number) => {
@@ -502,7 +568,7 @@ export function HotelProvider({ children }: { children: ReactNode }) {
         assignment: { reservationId, newRoom: roomNumber, previousRoom },
       });
     },
-    []
+    [],
   );
 
   const stageBillingChange = useCallback((change: StagedBillingChange) => {
@@ -510,23 +576,33 @@ export function HotelProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const stageRoomStatusChange = useCallback(
-    (roomNumber: number, newStatus: RoomStatus, previousStatus: RoomStatus, reason?: string) => {
+    (
+      roomNumber: number,
+      newStatus: RoomStatus,
+      previousStatus: RoomStatus,
+      reason?: string,
+    ) => {
       dispatch({
         type: "STAGE_ROOM_STATUS_CHANGE",
         change: { roomNumber, newStatus, previousStatus, reason },
       });
     },
-    []
+    [],
   );
 
   const stageRateChange = useCallback(
-    (roomType: RoomType, date: string, newRate: number, previousRate: number) => {
+    (
+      roomType: RoomType,
+      date: string,
+      newRate: number,
+      previousRate: number,
+    ) => {
       dispatch({
         type: "STAGE_RATE_CHANGE",
         change: { roomType, date, newRate, previousRate },
       });
     },
-    []
+    [],
   );
 
   const highlightRooms = useCallback((roomNumbers: number[]) => {
@@ -570,13 +646,16 @@ export function HotelProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const stageHousekeepingChange = useCallback(
-    (roomNumber: number, changes: Omit<StagedHousekeepingChange, "roomNumber">) => {
+    (
+      roomNumber: number,
+      changes: Omit<StagedHousekeepingChange, "roomNumber">,
+    ) => {
       dispatch({
         type: "STAGE_HOUSEKEEPING_CHANGE",
         change: { roomNumber, ...changes },
       });
     },
-    []
+    [],
   );
 
   const commitHousekeepingChange = useCallback(() => {
@@ -595,7 +674,7 @@ export function HotelProvider({ children }: { children: ReactNode }) {
     (message: { to: string; subject: string; body: string } | null) => {
       dispatch({ type: "SET_DRAFT_MESSAGE", message });
     },
-    []
+    [],
   );
 
   const clearDraftMessage = useCallback(() => {
@@ -608,44 +687,50 @@ export function HotelProvider({ children }: { children: ReactNode }) {
 
   // Data getters
   const getReservationById = useCallback(
-    (id: string) => state.reservations.find(r => r.id === id),
-    [state.reservations]
+    (id: string) => state.reservations.find((r) => r.id === id),
+    [state.reservations],
   );
 
   const getRoomByNumber = useCallback(
-    (number: number) => state.rooms.find(r => r.number === number),
-    [state.rooms]
+    (number: number) => state.rooms.find((r) => r.number === number),
+    [state.rooms],
   );
 
   const getBillingForReservation = useCallback(
-    (reservationId: string) => state.billingItems.filter(b => b.reservationId === reservationId),
-    [state.billingItems]
+    (reservationId: string) =>
+      state.billingItems.filter((b) => b.reservationId === reservationId),
+    [state.billingItems],
   );
 
   const getTodaysArrivals = useCallback(() => {
     const today = new Date().toISOString().split("T")[0];
     return state.reservations.filter(
-      r => r.checkInDate === today && (r.status === "confirmed" || r.status === "checked_in")
+      (r) =>
+        r.checkInDate === today &&
+        (r.status === "confirmed" || r.status === "checked_in"),
     );
   }, [state.reservations]);
 
   const getTodaysDepartures = useCallback(() => {
     const today = new Date().toISOString().split("T")[0];
-    return state.reservations.filter(r => r.checkOutDate === today && r.status === "checked_in");
+    return state.reservations.filter(
+      (r) => r.checkOutDate === today && r.status === "checked_in",
+    );
   }, [state.reservations]);
 
   const getAvailableRooms = useCallback(
     (type?: RoomType, features?: string[]) => {
-      return state.rooms.filter(room => {
-        if (room.status !== "available" && room.status !== "clean") return false;
+      return state.rooms.filter((room) => {
+        if (room.status !== "available" && room.status !== "clean")
+          return false;
         if (type && room.type !== type) return false;
         if (features && features.length > 0) {
-          if (!features.every(f => room.features.includes(f))) return false;
+          if (!features.every((f) => room.features.includes(f))) return false;
         }
         return true;
       });
     },
-    [state.rooms]
+    [state.rooms],
   );
 
   const value: HotelContextValue = {
@@ -686,7 +771,9 @@ export function HotelProvider({ children }: { children: ReactNode }) {
     getAvailableRooms,
   };
 
-  return <HotelContext.Provider value={value}>{children}</HotelContext.Provider>;
+  return (
+    <HotelContext.Provider value={value}>{children}</HotelContext.Provider>
+  );
 }
 
 // ============================================================================
