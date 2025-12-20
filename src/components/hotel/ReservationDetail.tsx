@@ -80,7 +80,7 @@ export function ReservationDetail({
   // Check if there's a staged room assignment for this reservation
   const stagedRoom =
     state?.stagedRoomAssignment?.reservationId === reservation.id
-      ? state.stagedRoomAssignment.newRoom
+      ? (state?.stagedRoomAssignment?.newRoom ?? null)
       : null;
 
   const displayRoomNumber = stagedRoom || reservation.roomNumber;
