@@ -26,19 +26,26 @@ import type {
   NavigateToViewArgs,
   HighlightElementArgs,
   GetForwardBookingsArgs,
-  Reservation,
-  Room,
+  SubmitRoomIssueArgs,
   BillingItem,
   OccupancyData,
+  ReservationSummary,
+  RoomSummary,
+  GuestSummary,
 } from "@/lib/hotel-types";
 
 // ============================================================================
 // Search & Navigation Tools
 // ============================================================================
 
+/**
+ * Search reservations and return minimal context for AI decisions.
+ * Returns summary info (ID, guest name, confirmation, status).
+ * Components should use the returned ID to fetch full data.
+ */
 export function searchReservations(
   args: SearchReservationsArgs,
-): Reservation[] {
+): ReservationSummary[] {
   const context = getHotelContextRef();
   const allReservations = context?.state.reservations || reservations;
 
@@ -99,9 +106,27 @@ export function searchReservations(
     context.highlightReservations(results.map((r) => r.id));
   }
 
-  return results;
+  // Return minimal context - components fetch full data using ID
+  return results.map((res) => {
+    const guest = getGuestById(res.guestId);
+    return {
+      id: res.id,
+      guestId: res.guestId,
+      guestName: guest ? `${guest.firstName} ${guest.lastName}` : "Unknown",
+      confirmationNumber: res.confirmationNumber,
+      status: res.status,
+      roomType: res.roomType,
+      roomNumber: res.roomNumber,
+      checkInDate: res.checkInDate,
+      checkOutDate: res.checkOutDate,
+    };
+  });
 }
 
+/**
+ * Get reservation details - returns minimal context for AI.
+ * Use the returned reservationId with ReservationDetail component.
+ */
 export function getReservationDetails(args: { reservationId: string }) {
   const context = getHotelContextRef();
   const allReservations = context?.state.reservations || reservations;
@@ -115,6 +140,10 @@ export function getReservationDetails(args: { reservationId: string }) {
   const billing = billingItems.filter(
     (b) => b.reservationId === reservation.id,
   );
+  const total = billing.reduce(
+    (sum, item) => sum + (item.isComped ? 0 : item.amount),
+    0,
+  );
 
   // Select and navigate to reservation
   if (context) {
@@ -122,18 +151,28 @@ export function getReservationDetails(args: { reservationId: string }) {
     context.navigateTo("reservations");
   }
 
+  // Return minimal context - components fetch full data using IDs
   return {
-    reservation,
-    guest,
-    billing,
-    total: billing.reduce(
-      (sum, item) => sum + (item.isComped ? 0 : item.amount),
-      0,
-    ),
+    reservationId: reservation.id,
+    guestId: reservation.guestId,
+    guestName: guest ? `${guest.firstName} ${guest.lastName}` : "Unknown",
+    confirmationNumber: reservation.confirmationNumber,
+    status: reservation.status,
+    roomType: reservation.roomType,
+    roomNumber: reservation.roomNumber,
+    checkInDate: reservation.checkInDate,
+    checkOutDate: reservation.checkOutDate,
+    billingTotal: total,
+    billingItemCount: billing.length,
   };
 }
 
-export function getAvailableRooms(args: GetAvailableRoomsArgs): Room[] {
+/**
+ * Get available rooms - returns minimal context for AI.
+ * Returns room numbers and types so AI can suggest options.
+ * Components should fetch full data using room number.
+ */
+export function getAvailableRooms(args: GetAvailableRoomsArgs): RoomSummary[] {
   const context = getHotelContextRef();
   const allRooms = context?.state.rooms || rooms;
 
@@ -158,7 +197,13 @@ export function getAvailableRooms(args: GetAvailableRoomsArgs): Room[] {
     context.navigateTo("rooms");
   }
 
-  return available;
+  // Return minimal context
+  return available.map((r) => ({
+    number: r.number,
+    type: r.type,
+    status: r.status,
+    features: r.features,
+  }));
 }
 
 export function navigateToView(args: NavigateToViewArgs) {
@@ -916,6 +961,10 @@ export function getEarlyCheckouts() {
 // Guest Services Tools
 // ============================================================================
 
+/**
+ * Look up guest by room number - returns minimal context for AI.
+ * Use guestId with GuestProfile component, reservationId with ReservationDetail.
+ */
 export function getGuestByRoom(args: { roomNumber: number }) {
   const context = getHotelContextRef();
   if (!context) {
@@ -952,10 +1001,15 @@ export function getGuestByRoom(args: { roomNumber: number }) {
   context.selectGuest(guest.id);
   context.navigateTo("guests");
 
+  // Return minimal context - components fetch full data using IDs
   return {
-    guest,
-    room,
-    reservation,
+    guestId: guest.id,
+    guestName: `${guest.firstName} ${guest.lastName}`,
+    email: guest.email,
+    loyaltyTier: guest.loyaltyTier,
+    roomNumber: args.roomNumber,
+    reservationId: reservation?.id,
+    confirmationNumber: reservation?.confirmationNumber,
     message: `Found ${guest.firstName} ${guest.lastName} in room ${args.roomNumber}.`,
   };
 }
@@ -1013,5 +1067,54 @@ export function initiateKeyGeneration(args: {
       keyCount,
     },
     message: `Key generation initiated for ${guest.firstName} ${guest.lastName}, room ${args.roomNumber}. ${keyCount} key(s) ready to print.`,
+  };
+}
+
+// ============================================================================
+// Room Issue Tools
+// ============================================================================
+
+export function submitRoomIssue(args: SubmitRoomIssueArgs) {
+  const context = getHotelContextRef();
+  if (!context) {
+    return { success: false, error: "Context not available" };
+  }
+
+  const room = context.state.rooms.find((r) => r.number === args.roomNumber);
+  if (!room) {
+    return { success: false, error: `Room ${args.roomNumber} not found` };
+  }
+
+  // Generate ticket ID
+  const ticketId = `ISS-${Date.now().toString(36).toUpperCase()}`;
+
+  // Get guest info if provided
+  let guestName: string | undefined;
+  if (args.guestId) {
+    const guest = guests.find((g) => g.id === args.guestId);
+    if (guest) {
+      guestName = `${guest.firstName} ${guest.lastName}`;
+    }
+  }
+
+  // Navigate to housekeeping view to show the issue context
+  context.navigateTo("housekeeping");
+  context.highlightRooms([args.roomNumber]);
+
+  return {
+    success: true,
+    ticketId,
+    issue: {
+      id: ticketId,
+      roomNumber: args.roomNumber,
+      guestId: args.guestId,
+      guestName,
+      category: args.category,
+      priority: args.priority,
+      description: args.description,
+      status: "open" as const,
+      createdAt: new Date().toISOString(),
+    },
+    message: `Room issue reported successfully. Ticket ID: ${ticketId}. Maintenance team has been notified about the ${args.category} issue in room ${args.roomNumber}.`,
   };
 }

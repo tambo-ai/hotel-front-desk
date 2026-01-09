@@ -480,3 +480,89 @@ export const GetForwardBookingsArgsSchema = z.object({
 export type GetForwardBookingsArgs = z.infer<
   typeof GetForwardBookingsArgsSchema
 >;
+
+// ============================================================================
+// Room Issue Types
+// ============================================================================
+
+export const RoomIssueCategoryEnum = z.enum([
+  "plumbing",
+  "electrical",
+  "hvac",
+  "noise",
+  "cleanliness",
+  "pest",
+  "maintenance",
+  "other",
+]);
+export type RoomIssueCategory = z.infer<typeof RoomIssueCategoryEnum>;
+
+export const RoomIssuePriorityEnum = z.enum(["low", "medium", "high", "urgent"]);
+export type RoomIssuePriority = z.infer<typeof RoomIssuePriorityEnum>;
+
+export const RoomIssueSchema = z.object({
+  id: z.string(),
+  roomNumber: z.number(),
+  guestId: z.string().optional(),
+  category: RoomIssueCategoryEnum,
+  priority: RoomIssuePriorityEnum,
+  description: z.string(),
+  status: z.enum(["open", "in_progress", "resolved"]),
+  createdAt: z.string(),
+  resolvedAt: z.string().optional(),
+});
+export type RoomIssue = z.infer<typeof RoomIssueSchema>;
+
+export const SubmitRoomIssueArgsSchema = z.object({
+  roomNumber: z.number().describe("Room number with the issue"),
+  guestId: z.string().optional().describe("Guest ID reporting the issue"),
+  category: RoomIssueCategoryEnum.describe("Issue category"),
+  priority: RoomIssuePriorityEnum.describe("Priority level"),
+  description: z.string().describe("Detailed description of the issue"),
+});
+export type SubmitRoomIssueArgs = z.infer<typeof SubmitRoomIssueArgsSchema>;
+
+// ============================================================================
+// Slim Tool Return Schemas (minimal context for AI decisions)
+// ============================================================================
+
+/**
+ * Minimal reservation info for AI context.
+ * Components should fetch full data using the ID.
+ */
+export const ReservationSummarySchema = z.object({
+  id: z.string().describe("Reservation ID - use with ReservationDetail or CheckInForm component"),
+  guestId: z.string().describe("Guest ID - use with GuestProfile or GuestMessageComposer component"),
+  guestName: z.string().describe("Guest full name"),
+  confirmationNumber: z.string().describe("Reservation confirmation number"),
+  status: ReservationStatusEnum.describe("Current reservation status"),
+  roomType: RoomTypeEnum.describe("Requested room type"),
+  roomNumber: z.number().optional().describe("Assigned room number if any"),
+  checkInDate: z.string().describe("Check-in date"),
+  checkOutDate: z.string().describe("Check-out date"),
+});
+export type ReservationSummary = z.infer<typeof ReservationSummarySchema>;
+
+/**
+ * Minimal room info for AI context.
+ * Components should fetch full data using the room number.
+ */
+export const RoomSummarySchema = z.object({
+  number: z.number().describe("Room number"),
+  type: RoomTypeEnum.describe("Room type"),
+  status: RoomStatusEnum.describe("Current room status"),
+  features: z.array(z.string()).describe("Room features"),
+});
+export type RoomSummary = z.infer<typeof RoomSummarySchema>;
+
+/**
+ * Minimal guest info for AI context.
+ * Components should fetch full data using the ID.
+ */
+export const GuestSummarySchema = z.object({
+  id: z.string().describe("Guest ID - use with GuestProfile component"),
+  name: z.string().describe("Guest full name"),
+  email: z.string().describe("Guest email"),
+  loyaltyTier: LoyaltyTierEnum.describe("Loyalty tier"),
+});
+export type GuestSummary = z.infer<typeof GuestSummarySchema>;

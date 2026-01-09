@@ -69,68 +69,54 @@ import {
   SettingsPage,
   SettingsPagePropsSchema,
 } from "@/components/hotel/SettingsPage";
+import {
+  RoomIssueForm,
+  RoomIssueFormPropsSchema,
+} from "@/components/hotel/RoomIssueForm";
+import {
+  CheckInForm,
+  CheckInFormPropsSchema,
+} from "@/components/hotel/CheckInForm";
 
-// Hotel Tools
+// Hotel Tools (data retrieval only)
 import {
   searchReservations,
   getReservationDetails,
   getAvailableRooms,
-  stageRoomAssignment,
-  stageBillingAdjustment,
-  stageRoomStatusChange,
-  stageRateChange,
-  stageHousekeepingUpdate,
   getOccupancyData,
   getCompetitorRates,
   getHistoricalOccupancy,
   getRoomTypeAvailability,
   getForwardBookings,
   calculateRevenueProjection,
-  draftGuestMessage,
-  draftRevenueReport,
   navigateToView,
   highlightElement,
-  // Commit tools
-  completeCheckIn,
-  commitReservationChanges,
-  commitRoomStatusChange,
-  commitHousekeepingChange,
-  commitRateChange,
-  // Guest services tools
   getGuestByRoom,
   getEarlyCheckouts,
-  initiateKeyGeneration,
 } from "@/services/hotel-tools";
 
-// Hotel Type Schemas
+// Hotel Type Schemas (data retrieval only)
 import {
   SearchReservationsArgsSchema,
   GetAvailableRoomsArgsSchema,
-  StageRoomAssignmentArgsSchema,
-  StageBillingAdjustmentArgsSchema,
-  StageRoomStatusChangeArgsSchema,
-  StageRateChangeArgsSchema,
   GetOccupancyDataArgsSchema,
   GetCompetitorRatesArgsSchema,
   GetHistoricalOccupancyArgsSchema,
   GetRoomTypeAvailabilityArgsSchema,
   GetForwardBookingsArgsSchema,
   CalculateRevenueProjectionArgsSchema,
-  DraftGuestMessageArgsSchema,
-  DraftRevenueReportArgsSchema,
   NavigateToViewArgsSchema,
   HighlightElementArgsSchema,
-  ReservationSchema,
-  RoomSchema,
   OccupancyDataSchema,
+  ReservationSummarySchema,
+  RoomSummarySchema,
 } from "@/lib/hotel-types";
 
 /**
  * tools
  *
  * This array contains all the Tambo tools that are registered for use within the application.
- * Each tool is defined with its name, description, and expected props. The tools
- * can be controlled by AI to dynamically fetch data based on user interactions.
+ * Tools are for DATA RETRIEVAL only - all actions/editing should be done via components.
  */
 export const tools: TamboTool[] = [
   // ============================================================================
@@ -139,39 +125,46 @@ export const tools: TamboTool[] = [
   {
     name: "searchReservations",
     description:
-      "Search for reservations by guest name, confirmation number, room number, or date. Use this to find a guest's reservation for check-in, check-out, or inquiry. Results are highlighted in the UI.",
+      "Search for reservations by guest name, confirmation number, room number, or date. Returns minimal context (IDs, names, status). Use the returned reservationId with ReservationDetail or CheckInForm components. Results are highlighted in the UI.",
     tool: searchReservations,
     toolSchema: z
       .function()
       .args(SearchReservationsArgsSchema)
-      .returns(z.array(ReservationSchema)),
+      .returns(z.array(ReservationSummarySchema)),
   },
   {
     name: "getReservationDetails",
     description:
-      "Get full details of a specific reservation including guest profile and billing information. Navigates to the reservation in the UI.",
+      "Get reservation details by ID. Returns minimal context for AI decisions. Use the returned reservationId with ReservationDetail component, guestId with GuestProfile component. Navigates to the reservation in the UI.",
     tool: getReservationDetails,
     toolSchema: z
       .function()
       .args(z.object({ reservationId: z.string() }))
       .returns(
         z.object({
-          reservation: ReservationSchema,
-          guest: z.any(),
-          billing: z.array(z.any()),
-          total: z.number(),
+          reservationId: z.string(),
+          guestId: z.string(),
+          guestName: z.string(),
+          confirmationNumber: z.string(),
+          status: z.string(),
+          roomType: z.string(),
+          roomNumber: z.number().optional(),
+          checkInDate: z.string(),
+          checkOutDate: z.string(),
+          billingTotal: z.number(),
+          billingItemCount: z.number(),
         }),
       ),
   },
   {
     name: "getAvailableRooms",
     description:
-      "Get a list of available rooms, optionally filtered by type (King, Queen, Suite) and features (city_view, balcony, etc.). Use this during check-in to find rooms for guests or when they request an upgrade.",
+      "Get available rooms, optionally filtered by type and features. Returns minimal context (room numbers, types, features). Use during check-in to show available options.",
     tool: getAvailableRooms,
     toolSchema: z
       .function()
       .args(GetAvailableRoomsArgsSchema)
-      .returns(z.array(RoomSchema)),
+      .returns(z.array(RoomSummarySchema)),
   },
   {
     name: "navigateToView",
@@ -180,22 +173,7 @@ export const tools: TamboTool[] = [
     tool: navigateToView,
     toolSchema: z
       .function()
-      .args(
-        z.object({
-          view: z
-            .enum([
-              "dashboard",
-              "reservations",
-              "rooms",
-              "guests",
-              "housekeeping",
-              "reports",
-              "rates",
-              "settings",
-            ])
-            .describe("View to navigate to"),
-        }),
-      )
+      .args(NavigateToViewArgsSchema)
       .returns(z.object({ success: z.boolean() })),
   },
   {
@@ -207,91 +185,6 @@ export const tools: TamboTool[] = [
       .function()
       .args(HighlightElementArgsSchema)
       .returns(z.object({ success: z.boolean() })),
-  },
-
-  // ============================================================================
-  // Staging Tools (Human-in-the-Loop)
-  // ============================================================================
-  {
-    name: "stageRoomAssignment",
-    description:
-      "Stage a room assignment for a reservation. This does NOT commit the change - it prepares it for the agent to review and confirm by clicking a button. Use during check-in or room changes.",
-    tool: stageRoomAssignment,
-    toolSchema: z
-      .function()
-      .args(StageRoomAssignmentArgsSchema)
-      .returns(
-        z.object({
-          success: z.boolean(),
-          stagedChange: z
-            .object({
-              previousRoom: z.number().optional(),
-              newRoom: z.number(),
-              roomDetails: RoomSchema,
-            })
-            .optional(),
-          message: z.string().optional(),
-          error: z.string().optional(),
-        }),
-      ),
-  },
-  {
-    name: "stageBillingAdjustment",
-    description:
-      "Stage a billing adjustment (add charge, remove charge, or apply discount). Changes are NOT committed until the agent clicks 'Save'. Use this to comp items, add charges, or apply discounts during check-in/out.",
-    tool: stageBillingAdjustment,
-    toolSchema: z
-      .function()
-      .args(StageBillingAdjustmentArgsSchema)
-      .returns(
-        z.object({
-          success: z.boolean(),
-          message: z.string().optional(),
-          error: z.string().optional(),
-        }),
-      ),
-  },
-  {
-    name: "stageRoomStatusChange",
-    description:
-      "Stage a room status change (available, occupied, dirty, clean, out_of_order). Changes are NOT committed until the agent clicks 'Save'. Use this to mark rooms as out of order, update cleaning status, etc.",
-    tool: stageRoomStatusChange,
-    toolSchema: z
-      .function()
-      .args(StageRoomStatusChangeArgsSchema)
-      .returns(
-        z.object({
-          success: z.boolean(),
-          stagedChange: RoomSchema.optional(),
-          message: z.string().optional(),
-          error: z.string().optional(),
-        }),
-      ),
-  },
-  {
-    name: "stageRateChange",
-    description:
-      "Stage a rate change for a room type on a specific date. Changes are NOT committed until the agent clicks 'Apply Rate Change'. Use this to adjust pricing strategy.",
-    tool: stageRateChange,
-    toolSchema: z
-      .function()
-      .args(StageRateChangeArgsSchema)
-      .returns(
-        z.object({
-          success: z.boolean(),
-          stagedRate: z
-            .object({
-              roomType: z.string(),
-              date: z.string(),
-              rate: z.number(),
-              previousRate: z.number(),
-            })
-            .optional(),
-          affectedRooms: z.number().optional(),
-          message: z.string().optional(),
-          error: z.string().optional(),
-        }),
-      ),
   },
 
   // ============================================================================
@@ -402,169 +295,8 @@ export const tools: TamboTool[] = [
   },
 
   // ============================================================================
-  // Communication Tools
+  // Guest Services Tools
   // ============================================================================
-  {
-    name: "draftGuestMessage",
-    description:
-      "Draft a personalized message to a guest using templates (welcome, apology, confirmation, thank_you, custom). The message appears in a composer for the agent to review and send. Include context and offers for apology messages.",
-    tool: draftGuestMessage,
-    toolSchema: z
-      .function()
-      .args(DraftGuestMessageArgsSchema)
-      .returns(
-        z.object({
-          subject: z.string(),
-          body: z.string(),
-          guestEmail: z.string(),
-          message: z.string().optional(),
-          error: z.string().optional(),
-        }),
-      ),
-  },
-  {
-    name: "draftRevenueReport",
-    description:
-      "Draft a revenue report email with occupancy data and optional rate change details. The report appears in a composer for the agent to review and send.",
-    tool: draftRevenueReport,
-    toolSchema: z
-      .function()
-      .args(DraftRevenueReportArgsSchema)
-      .returns(
-        z.object({
-          subject: z.string(),
-          body: z.string(),
-          chartData: z.any(),
-          message: z.string().optional(),
-        }),
-      ),
-  },
-
-  // ============================================================================
-  // Commit Tools (Finalize Human-in-the-Loop Changes)
-  // ============================================================================
-  {
-    name: "completeCheckIn",
-    description:
-      "Complete the check-in process: commits staged room assignment and billing changes, updates reservation status to checked_in. Call this after staging room and billing changes.",
-    tool: completeCheckIn,
-    toolSchema: z
-      .function()
-      .args(
-        z.object({
-          reservationId: z.string().describe("Reservation ID to check in"),
-        }),
-      )
-      .returns(
-        z.object({
-          success: z.boolean(),
-          message: z.string().optional(),
-          error: z.string().optional(),
-        }),
-      ),
-  },
-  {
-    name: "commitReservationChanges",
-    description:
-      "Commit staged room assignment without full check-in. Use when moving a guest to a different room.",
-    tool: commitReservationChanges,
-    toolSchema: z
-      .function()
-      .args(z.object({ reservationId: z.string().describe("Reservation ID") }))
-      .returns(
-        z.object({
-          success: z.boolean(),
-          message: z.string().optional(),
-          error: z.string().optional(),
-        }),
-      ),
-  },
-  {
-    name: "commitRoomStatusChange",
-    description:
-      "Commit a staged room status change (out_of_order, dirty, clean, etc.). Call after stageRoomStatusChange.",
-    tool: commitRoomStatusChange,
-    toolSchema: z
-      .function()
-      .args(z.object({ roomNumber: z.number().describe("Room number") }))
-      .returns(
-        z.object({
-          success: z.boolean(),
-          message: z.string().optional(),
-          error: z.string().optional(),
-        }),
-      ),
-  },
-  {
-    name: "commitHousekeepingChange",
-    description:
-      "Commit a staged housekeeping change (priority, status, notes). Call after stageHousekeepingUpdate.",
-    tool: commitHousekeepingChange,
-    toolSchema: z
-      .function()
-      .args(z.object({ roomNumber: z.number().describe("Room number") }))
-      .returns(
-        z.object({
-          success: z.boolean(),
-          message: z.string().optional(),
-          error: z.string().optional(),
-        }),
-      ),
-  },
-  {
-    name: "commitRateChange",
-    description:
-      "Commit a staged rate change for a room type. Call after stageRateChange.",
-    tool: commitRateChange,
-    toolSchema: z
-      .function()
-      .args(
-        z.object({
-          roomType: z.string().describe("Room type (King, Queen, Suite)"),
-          date: z.string().describe("Date for the rate change"),
-        }),
-      )
-      .returns(
-        z.object({
-          success: z.boolean(),
-          message: z.string().optional(),
-          error: z.string().optional(),
-        }),
-      ),
-  },
-
-  // ============================================================================
-  // Housekeeping Tools
-  // ============================================================================
-  {
-    name: "stageHousekeepingUpdate",
-    description:
-      "Stage a housekeeping task update (priority: rush/normal, status: dirty/in_progress/ready, notes). Changes are NOT committed until commitHousekeepingChange is called.",
-    tool: stageHousekeepingUpdate,
-    toolSchema: z
-      .function()
-      .args(
-        z.object({
-          roomNumber: z.number().describe("Room number"),
-          priority: z
-            .enum(["normal", "rush"])
-            .optional()
-            .describe("Housekeeping priority"),
-          status: z
-            .enum(["dirty", "in_progress", "ready"])
-            .optional()
-            .describe("Cleaning status"),
-          notes: z.string().optional().describe("Notes for housekeeping staff"),
-        }),
-      )
-      .returns(
-        z.object({
-          success: z.boolean(),
-          message: z.string().optional(),
-          error: z.string().optional(),
-        }),
-      ),
-  },
   {
     name: "getEarlyCheckouts",
     description:
@@ -586,14 +318,10 @@ export const tools: TamboTool[] = [
         ),
       ),
   },
-
-  // ============================================================================
-  // Guest Services Tools
-  // ============================================================================
   {
     name: "getGuestByRoom",
     description:
-      "Look up the current guest in a specific room. Returns guest profile and reservation details. Use when a guest calls from their room.",
+      "Look up the current guest in a specific room. Returns minimal context (guestId, guestName, reservationId). Use guestId with GuestProfile component, reservationId with ReservationDetail component.",
     tool: getGuestByRoom,
     toolSchema: z
       .function()
@@ -601,45 +329,15 @@ export const tools: TamboTool[] = [
         z.object({ roomNumber: z.number().describe("Room number to look up") }),
       )
       .returns(
-        z
-          .object({
-            guest: z.any(),
-            reservation: z.any(),
-            billingTotal: z.number(),
-          })
-          .nullable(),
-      ),
-  },
-  {
-    name: "initiateKeyGeneration",
-    description:
-      "Start the key card generation workflow. Opens the key card dialog for printing. Use when a guest needs new room keys.",
-    tool: initiateKeyGeneration,
-    toolSchema: z
-      .function()
-      .args(
         z.object({
-          roomNumber: z.number().describe("Room number"),
-          guestId: z.string().describe("Guest ID"),
-          keyCount: z
-            .number()
-            .optional()
-            .describe("Number of keys to generate (default: 2)"),
-        }),
-      )
-      .returns(
-        z.object({
-          success: z.boolean(),
-          keyData: z
-            .object({
-              roomNumber: z.number(),
-              guestName: z.string(),
-              checkOutDate: z.string(),
-              keyCount: z.number(),
-            })
-            .optional(),
-          message: z.string().optional(),
-          error: z.string().optional(),
+          guestId: z.string(),
+          guestName: z.string(),
+          email: z.string(),
+          loyaltyTier: z.string(),
+          roomNumber: z.number(),
+          reservationId: z.string().optional(),
+          confirmationNumber: z.string().optional(),
+          message: z.string(),
         }),
       ),
   },
@@ -659,14 +357,14 @@ export const components: TamboComponent[] = [
   {
     name: "ReservationDetail",
     description:
-      "Displays a reservation summary with guest info, dates, room assignment, and status. Use to show reservation details during check-in, check-out, or inquiries.",
+      "Displays reservation details. Pass the reservationId from search results - component fetches data internally. Shows guest info, dates, room assignment, and status.",
     component: ReservationDetail,
     propsSchema: ReservationDetailPropsSchema,
   },
   {
     name: "GuestProfile",
     description:
-      "Shows guest information including contact details, loyalty tier, preferences, and stay history. Use to display guest info during check-in or service inquiries.",
+      "Shows guest profile. Pass the guestId from tool results - component fetches data internally. Displays contact details, loyalty tier, preferences, and stay history.",
     component: GuestProfile,
     propsSchema: GuestProfilePropsSchema,
   },
@@ -702,14 +400,14 @@ export const components: TamboComponent[] = [
   {
     name: "ArrivalsTable",
     description:
-      "Table of today's expected arrivals with guest info, room assignment, and ETA. Can filter for VIP only. Use for morning preparation or check-in workflow.",
+      "Shows today's expected arrivals. Fetches data internally. Can filter for VIP only. Use for morning preparation or check-in workflow.",
     component: ArrivalsTable,
     propsSchema: ArrivalsTablePropsSchema,
   },
   {
     name: "DeparturesTable",
     description:
-      "Table of today's expected departures with guest info, room, and balance. Can filter for early checkouts. Use for departure management.",
+      "Shows today's expected departures. Fetches data internally. Can filter for early checkouts. Use for departure management.",
     component: DeparturesTable,
     propsSchema: DeparturesTablePropsSchema,
   },
@@ -752,7 +450,7 @@ export const components: TamboComponent[] = [
   {
     name: "GuestMessageComposer",
     description:
-      "Email composer for guest communications with subject, body, and send button. Use after drafting a message with draftGuestMessage tool.",
+      "Use this component when user asks to send, draft, or compose an email to a guest. Pass guestId (from searchReservations or getGuestByRoom), subject, and body. Component fetches guest email internally. DO NOT write email as plain text - use this component so user can review, edit, and send. Syncs to, subject, body, messageStatus back to AI.",
     component: GuestMessageComposer,
     propsSchema: GuestMessageComposerPropsSchema,
   },
@@ -784,5 +482,27 @@ export const components: TamboComponent[] = [
       "Settings panel with theme toggle to switch between light mode, dark mode, and system preference. Use when the user wants to change appearance settings.",
     component: SettingsPage,
     propsSchema: SettingsPagePropsSchema,
+  },
+
+  // ============================================================================
+  // Check-in/Check-out Components
+  // ============================================================================
+  {
+    name: "CheckInForm",
+    description:
+      "Interactive check-in form. Pass the reservationId from search results - component fetches data internally. User can select room and complete check-in. Component syncs selectedRoom and checkInStatus back to AI context for follow-up actions.",
+    component: CheckInForm,
+    propsSchema: CheckInFormPropsSchema,
+  },
+
+  // ============================================================================
+  // Room Issue Components
+  // ============================================================================
+  {
+    name: "RoomIssueForm",
+    description:
+      "Dedicated form for reporting room issues with category selection (plumbing, electrical, HVAC, noise, cleanliness, pest, maintenance, other), priority level (low, medium, high, urgent), and description field. Use to display a form for guests or staff to report maintenance issues for a specific room.",
+    component: RoomIssueForm,
+    propsSchema: RoomIssueFormPropsSchema,
   },
 ];
