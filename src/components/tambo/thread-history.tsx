@@ -86,7 +86,7 @@ const ThreadHistory = React.forwardRef<HTMLDivElement, ThreadHistoryProps>(
       isLoading,
       error,
       refetch,
-    } = useTamboThreadList({ contextKey });
+    } = useTamboThreadList();
 
     const {
       switchCurrentThread,

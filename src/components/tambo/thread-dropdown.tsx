@@ -40,7 +40,7 @@ export const ThreadDropdown = React.forwardRef<
     isLoading,
     error,
     refetch,
-  } = useTamboThreadList({ contextKey });
+  } = useTamboThreadList();
   const { switchCurrentThread, startNewThread } = useTamboThread();
   const isMac =
     typeof navigator !== "undefined" && navigator.platform.startsWith("Mac");
