@@ -201,6 +201,10 @@
   --shadow-lg:
     0 10px 15px -3px oklch(0 0 0 / 0.25), 0 4px 6px -4px oklch(0 0 0 / 0.1);
   --shadow-focus: 0 0 0 2px oklch(0.6 0.1 264 / 0.3);
+    --radius: 0.5rem;
+    --panel-left-width: 500px;
+    --panel-right-width: 500px;
+    --sidebar-width: 3rem;
 }
 
 @layer base {
@@ -308,12 +312,14 @@
   }
 
   /* Hide scrollbar but keep functionality */
-  .scrollbar-hidden {
+  .scrollbar-hidden,
+  .scrollbar-none {
     -ms-overflow-style: none;
     scrollbar-width: none;
   }
 
-  .scrollbar-hidden::-webkit-scrollbar {
+  .scrollbar-hidden::-webkit-scrollbar,
+  .scrollbar-none::-webkit-scrollbar {
     display: none;
   }
 

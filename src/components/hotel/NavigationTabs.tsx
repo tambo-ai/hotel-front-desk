@@ -2,6 +2,7 @@
 
 import { useHotel } from "@/lib/hotel-store";
 import type { ViewType } from "@/lib/hotel-types";
+import { cn } from "@/lib/utils";
 import {
   LayoutDashboard,
   BedDouble,
@@ -13,6 +14,11 @@ import {
   Settings,
   Command,
 } from "lucide-react";
+
+interface NavigationTabsProps {
+  onSearchClick?: () => void;
+  isChatOpen?: boolean;
+}
 
 interface NavTab {
   id: ViewType;
@@ -69,7 +75,7 @@ const tabs: NavTab[] = [
   },
 ];
 
-export function NavigationTabs() {
+export function NavigationTabs({ onSearchClick, isChatOpen }: NavigationTabsProps) {
   const { state, navigateTo } = useHotel();
 
   return (
@@ -119,16 +125,21 @@ export function NavigationTabs() {
           ))}
         </div>
 
-        {/* Right section - search hint (visual indicator only) */}
+        {/* Right section - chat toggle button */}
         <div className="ml-auto flex items-center gap-3">
-          <div
-            role="presentation"
-            className="flex items-center gap-2 rounded-md border border-border bg-secondary/50 px-3 py-1.5 text-[13px] text-muted-foreground"
+          <button
+            onClick={onSearchClick}
+            className={cn(
+              "flex items-center gap-2 rounded-md border px-3 py-1.5 text-[13px] transition-colors",
+              isChatOpen
+                ? "border-accent bg-accent/10 text-accent"
+                : "border-border bg-secondary/50 text-muted-foreground hover:bg-secondary hover:text-foreground"
+            )}
           >
             <Command className="h-3.5 w-3.5" aria-hidden="true" />
-            <span>Search...</span>
+            <span>{isChatOpen ? "Close" : "Search..."}</span>
             <kbd className="kbd">K</kbd>
-          </div>
+          </button>
         </div>
       </div>
     </nav>
