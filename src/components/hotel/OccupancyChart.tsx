@@ -176,7 +176,7 @@ export function OccupancyChart({
           </span>
         </div>
         <div className="h-32">
-          <ResponsiveContainer width="100%" height="100%">
+          <ResponsiveContainer width="100%" height="100%" minWidth={1} minHeight={1}>
             <LineChart data={mergedData}>
               <Line
                 type="monotone"
@@ -443,7 +443,7 @@ export function OccupancyChart({
 
       <div className="p-4">
         <div className="h-80">
-          <ResponsiveContainer width="100%" height="100%">
+          <ResponsiveContainer width="100%" height="100%" minWidth={1} minHeight={1}>
             {renderChart()}
           </ResponsiveContainer>
         </div>

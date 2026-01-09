@@ -86,7 +86,7 @@ export function RoomTypeBreakdown({
         </div>
         <div className="flex items-center gap-4">
           <div className="h-16 w-16 shrink-0">
-            <ResponsiveContainer width="100%" height="100%">
+            <ResponsiveContainer width="100%" height="100%" minWidth={1} minHeight={1}>
               <PieChart>
                 <Pie
                   data={pieData}
@@ -161,7 +161,7 @@ export function RoomTypeBreakdown({
         <div className="flex flex-col items-center gap-4 lg:flex-row lg:items-start">
           {/* Pie Chart - fixed size */}
           <div className="h-[140px] w-[140px] shrink-0">
-            <ResponsiveContainer width="100%" height="100%">
+            <ResponsiveContainer width="100%" height="100%" minWidth={1} minHeight={1}>
               <PieChart>
                 <Pie
                   data={pieData}

@@ -473,7 +473,7 @@ export const Graph = React.forwardRef<HTMLDivElement, GraphProps>(
               </h3>
             )}
             <div className="w-full h-[calc(100%-2rem)]">
-              <RechartsCore.ResponsiveContainer width="100%" height="100%">
+              <RechartsCore.ResponsiveContainer width="100%" height="100%" minWidth={1} minHeight={1}>
                 {renderChart()}
               </RechartsCore.ResponsiveContainer>
             </div>

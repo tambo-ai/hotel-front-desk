@@ -131,7 +131,7 @@ export function RevenueChart({
 
       <div className="p-4">
         <div className="h-48">
-          <ResponsiveContainer width="100%" height="100%">
+          <ResponsiveContainer width="100%" height="100%" minWidth={1} minHeight={1}>
             <BarChart data={chartData} layout="vertical">
               <CartesianGrid
                 strokeDasharray="3 3"
