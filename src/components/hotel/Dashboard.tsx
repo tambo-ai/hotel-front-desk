@@ -2,7 +2,6 @@
 
 import { useEffect } from "react";
 import { useHotel, setHotelContextRef } from "@/lib/hotel-store";
-import { NavigationTabs } from "./NavigationTabs";
 import { RoomGrid } from "./RoomGrid";
 import { ArrivalsTable } from "./ArrivalsTable";
 import { DeparturesTable } from "./DeparturesTable";
@@ -61,9 +60,7 @@ export function Dashboard() {
   ).length;
 
   return (
-    <div className="min-h-screen bg-background">
-      <NavigationTabs />
-
+    <div className="min-h-full bg-background">
       {/* Main Content */}
       <main className="mx-auto max-w-[1920px] p-6">
         {state.currentView === "dashboard" && (
@@ -102,12 +99,12 @@ export function Dashboard() {
               />
             </div>
 
-            {/* Main Grid */}
-            <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-              <div className="lg:col-span-2">
+            {/* Main Grid - responsive for chat panel */}
+            <div className="grid grid-cols-1 gap-6 2xl:grid-cols-[1fr_320px]">
+              <div className="min-w-0">
                 <ArrivalsTable />
               </div>
-              <div>
+              <div className="min-w-[280px]">
                 <RoomTypeBreakdown />
               </div>
             </div>
@@ -121,12 +118,12 @@ export function Dashboard() {
         )}
 
         {state.currentView === "reservations" && (
-          <div className="grid grid-cols-1 gap-6 lg:grid-cols-3 animate-in">
-            <div className="space-y-6 lg:col-span-2">
+          <div className="grid grid-cols-1 gap-6 2xl:grid-cols-[1fr_360px] animate-in">
+            <div className="space-y-6 min-w-0">
               <ArrivalsTable />
               <DeparturesTable />
             </div>
-            <div className="space-y-4">
+            <div className="space-y-4 min-w-[320px]">
               {state.selectedReservationId ? (
                 <>
                   <ReservationDetail
@@ -154,16 +151,16 @@ export function Dashboard() {
 
         {state.currentView === "rooms" && (
           <div className="space-y-6 animate-in">
-            {/* On mobile: stats first, then grid. On desktop: side by side */}
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:hidden">
+            {/* On mobile/tablet: stats first, then grid. On large desktop: side by side */}
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 2xl:hidden">
               <RoomTypeBreakdown compact />
               <HousekeepingStatus filterStatus="dirty" compact />
             </div>
-            <div className="grid grid-cols-1 gap-6 lg:grid-cols-4">
-              <div className="lg:col-span-3">
+            <div className="grid grid-cols-1 gap-6 2xl:grid-cols-[1fr_280px]">
+              <div className="min-w-0">
                 <RoomGrid />
               </div>
-              <div className="hidden space-y-4 lg:block">
+              <div className="hidden space-y-4 2xl:block min-w-[260px]">
                 <RoomTypeBreakdown />
                 <HousekeepingStatus filterStatus="dirty" compact />
               </div>
@@ -204,11 +201,11 @@ export function Dashboard() {
         )}
 
         {state.currentView === "rates" && (
-          <div className="grid grid-cols-1 gap-6 lg:grid-cols-3 animate-in">
-            <div className="lg:col-span-2">
+          <div className="grid grid-cols-1 gap-6 2xl:grid-cols-[1fr_280px] animate-in">
+            <div className="min-w-0">
               <RatePricingForm showCompetitors />
             </div>
-            <div className="space-y-4">
+            <div className="space-y-4 min-w-[260px]">
               <OccupancyChart dateRange="week" compact />
               <RoomTypeBreakdown compact />
             </div>

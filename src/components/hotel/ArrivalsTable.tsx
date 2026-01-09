@@ -133,22 +133,22 @@ export function ArrivalsTable({
         <table className="w-full">
           <thead>
             <tr className="border-b border-border bg-muted/30">
-              <th className="px-4 py-2.5 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground">
+              <th className="px-3 py-2.5 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground">
                 Guest
               </th>
-              <th className="px-4 py-2.5 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground">
+              <th className="hidden px-3 py-2.5 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground sm:table-cell">
                 Confirmation
               </th>
-              <th className="px-4 py-2.5 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground">
+              <th className="px-3 py-2.5 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground">
                 Room
               </th>
-              <th className="px-4 py-2.5 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground">
+              <th className="px-3 py-2.5 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground">
                 ETA
               </th>
-              <th className="px-4 py-2.5 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground">
+              <th className="hidden px-3 py-2.5 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground lg:table-cell">
                 Notes
               </th>
-              <th className="px-4 py-2.5 text-right text-xs font-medium uppercase tracking-wide text-muted-foreground">
+              <th className="px-3 py-2.5 text-right text-xs font-medium uppercase tracking-wide text-muted-foreground">
                 Action
               </th>
             </tr>
@@ -169,7 +169,7 @@ export function ArrivalsTable({
                   }`}
                   onClick={() => selectReservation(res.id)}
                 >
-                  <td className="px-4 py-3">
+                  <td className="px-3 py-2.5">
                     <div className="flex items-center gap-2">
                       {guest && (
                         <span
@@ -182,45 +182,45 @@ export function ArrivalsTable({
                               : guest.loyaltyTier.substring(0, 3).toUpperCase()}
                         </span>
                       )}
-                      <span className="font-medium text-foreground">
+                      <span className="font-medium text-foreground whitespace-nowrap">
                         {guest?.firstName} {guest?.lastName}
                       </span>
-                      {isVip && <Award className="h-3.5 w-3.5 text-warning" />}
+                      {isVip && <Award className="h-3.5 w-3.5 text-warning shrink-0" />}
                     </div>
                   </td>
-                  <td className="px-4 py-3">
+                  <td className="hidden px-3 py-2.5 sm:table-cell">
                     <code className="rounded bg-muted px-1.5 py-0.5 font-mono text-xs text-muted-foreground">
                       {res.confirmationNumber}
                     </code>
                   </td>
-                  <td className="px-4 py-3">
+                  <td className="px-3 py-2.5">
                     <div className="flex items-center gap-1.5">
-                      <BedDouble className="h-3.5 w-3.5 text-muted-foreground" />
-                      <span className="text-sm text-foreground">
+                      <BedDouble className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                      <span className="text-sm text-foreground whitespace-nowrap">
                         {res.roomNumber
-                          ? `Room ${res.roomNumber}`
+                          ? `${res.roomNumber}`
                           : res.roomType}
                       </span>
                     </div>
                   </td>
-                  <td className="px-4 py-3">
+                  <td className="px-3 py-2.5">
                     {res.estimatedArrivalTime ? (
-                      <div className="flex items-center gap-1.5 text-sm text-foreground">
-                        <Clock className="h-3.5 w-3.5 text-muted-foreground" />
+                      <div className="flex items-center gap-1 text-sm text-foreground whitespace-nowrap">
+                        <Clock className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
                         {res.estimatedArrivalTime}
                       </div>
                     ) : (
                       <span className="text-muted-foreground/50">—</span>
                     )}
                   </td>
-                  <td className="px-4 py-3">
+                  <td className="hidden px-3 py-2.5 lg:table-cell">
                     {res.specialRequests.length > 0 ? (
                       <div
                         className="flex items-center gap-1.5 text-muted-foreground"
                         title={res.specialRequests.join(", ")}
                       >
-                        <MessageSquare className="h-3.5 w-3.5" />
-                        <span className="text-xs">
+                        <MessageSquare className="h-3.5 w-3.5 shrink-0" />
+                        <span className="text-xs whitespace-nowrap">
                           {res.specialRequests.length} request(s)
                         </span>
                       </div>
@@ -228,7 +228,7 @@ export function ArrivalsTable({
                       <span className="text-muted-foreground/50">—</span>
                     )}
                   </td>
-                  <td className="px-4 py-3 text-right">
+                  <td className="px-3 py-2.5 text-right">
                     {res.status === "confirmed" && (
                       <button
                         onClick={(e) => {
