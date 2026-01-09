@@ -14,6 +14,12 @@ export default function Home() {
       components={components}
       tools={tools}
       tamboUrl={process.env.NEXT_PUBLIC_TAMBO_URL}
+      contextHelpers={{
+        browserLanguage: () => ({
+          language: typeof navigator !== "undefined" ? navigator.language : "en-US",
+          instruction: "Always respond in this language and generate suggestions in this language.",
+        }),
+      }}
     >
       <HotelProvider>
         <Dashboard />
