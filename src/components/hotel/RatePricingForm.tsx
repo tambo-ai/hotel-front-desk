@@ -133,7 +133,7 @@ export function RatePricingForm({
           </thead>
           <tbody className="divide-y divide-border">
             {dates.map((d) => {
-              const dateRates = ratesByDate[d];
+              const dateRates = ratesByDate[d] || [];
               const dateObj = new Date(d);
               const dayOfWeek = dateObj.toLocaleDateString("en-US", {
                 weekday: "short",
