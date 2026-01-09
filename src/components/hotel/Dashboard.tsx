@@ -14,7 +14,6 @@ import { RatePricingForm } from "./RatePricingForm";
 import { ReservationDetail } from "./ReservationDetail";
 import { BillingStatement } from "./BillingStatement";
 import { GuestProfile } from "./GuestProfile";
-import { CheckInForm } from "./CheckInForm";
 import { GuestMessageComposer } from "./GuestMessageComposer";
 import { SettingsPage } from "./SettingsPage";
 import { guests, reservations } from "@/data/mock-data";
@@ -38,13 +37,9 @@ export function Dashboard() {
     return () => setHotelContextRef(null);
   }, [hotelContext]);
 
-  // Get selected reservation for detail panel
+  // Get selected reservation for guestId lookup
   const selectedReservation = state.selectedReservationId
     ? reservations.find((r) => r.id === state.selectedReservationId)
-    : null;
-
-  const selectedGuest = selectedReservation
-    ? guests.find((g) => g.id === selectedReservation.guestId)
     : null;
 
   // Quick stats
@@ -132,14 +127,16 @@ export function Dashboard() {
               <DeparturesTable />
             </div>
             <div className="space-y-4">
-              {selectedReservation ? (
+              {state.selectedReservationId ? (
                 <>
                   <ReservationDetail
-                    reservation={selectedReservation}
+                    reservationId={state.selectedReservationId}
                     showActions
                   />
-                  {selectedGuest && <GuestProfile guest={selectedGuest} />}
-                  <BillingStatement reservationId={selectedReservation.id} />
+                  {selectedReservation?.guestId && (
+                    <GuestProfile guestId={selectedReservation.guestId} />
+                  )}
+                  <BillingStatement reservationId={state.selectedReservationId} />
                 </>
               ) : (
                 <div className="flex flex-col items-center justify-center rounded-lg border border-dashed border-border bg-card/50 p-12 text-center">
@@ -177,7 +174,7 @@ export function Dashboard() {
         {state.currentView === "guests" && (
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 animate-in">
             {guests.slice(0, 12).map((guest) => (
-              <GuestProfile key={guest.id} guest={guest} showHistory />
+              <GuestProfile key={guest.id} guestId={guest.id} showHistory />
             ))}
           </div>
         )}
@@ -224,9 +221,6 @@ export function Dashboard() {
           </div>
         )}
       </main>
-
-      {/* Check-in Form Modal */}
-      {state.checkInReservationId && <CheckInForm />}
 
       {/* Draft Message Modal */}
       {state.draftMessage && (

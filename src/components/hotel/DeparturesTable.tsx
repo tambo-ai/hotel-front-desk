@@ -1,17 +1,13 @@
 "use client";
 
 import { z } from "zod";
-import { ReservationSchema, tierColors } from "@/lib/hotel-types";
+import { tierColors } from "@/lib/hotel-types";
 import { useHotel } from "@/lib/hotel-store";
 import { guests } from "@/data/mock-data";
 import { LogOut, BedDouble, DollarSign, User, AlertCircle } from "lucide-react";
 
-// Schema for Tambo component registration
+// Schema for Tambo component registration - fetches departures internally
 export const DeparturesTablePropsSchema = z.object({
-  reservations: z
-    .array(ReservationSchema)
-    .optional()
-    .describe("Reservations to display (defaults to today's departures)"),
   highlightedIds: z
     .array(z.string())
     .optional()
@@ -23,7 +19,6 @@ export const DeparturesTablePropsSchema = z.object({
 export type DeparturesTableProps = z.infer<typeof DeparturesTablePropsSchema>;
 
 export function DeparturesTable({
-  reservations: providedReservations,
   highlightedIds,
   showEarlyOnly = false,
   compact = false,
@@ -35,8 +30,8 @@ export function DeparturesTable({
     getBillingForReservation,
   } = useHotel();
 
-  // Get departures from props or state
-  let departures = providedReservations || getTodaysDepartures();
+  // Fetch today's departures internally
+  let departures = getTodaysDepartures();
 
   // Filter for early checkouts only if requested
   if (showEarlyOnly) {

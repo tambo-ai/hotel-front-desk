@@ -1336,6 +1336,17 @@ export const roomRates: RoomRate[] = generateRoomRates();
 // Occupancy Data - 30 days historical + 7 days projected
 // ============================================================================
 
+// Deterministic pseudo-random based on date string to avoid hydration mismatch
+function seededRandom(seed: string): number {
+  let hash = 0;
+  for (let i = 0; i < seed.length; i++) {
+    const char = seed.charCodeAt(i);
+    hash = (hash << 5) - hash + char;
+    hash = hash & hash;
+  }
+  return Math.abs(hash % 100) / 100;
+}
+
 function generateOccupancyData(): OccupancyData[] {
   const data: OccupancyData[] = [];
   const totalRooms = 40;
@@ -1346,14 +1357,17 @@ function generateOccupancyData(): OccupancyData[] {
     const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
     const isFriday = dayOfWeek === 5;
 
+    // Use deterministic random based on date
+    const randomFactor = seededRandom(date + "occupancy");
+
     // Base occupancy varies by day
     let baseOccupancy: number;
     if (isWeekend) {
-      baseOccupancy = 60 + Math.random() * 15; // 60-75% weekends (lower)
+      baseOccupancy = 60 + randomFactor * 15; // 60-75% weekends (lower)
     } else if (isFriday) {
-      baseOccupancy = 75 + Math.random() * 15; // 75-90% Fridays
+      baseOccupancy = 75 + randomFactor * 15; // 75-90% Fridays
     } else {
-      baseOccupancy = 80 + Math.random() * 15; // 80-95% weekdays
+      baseOccupancy = 80 + randomFactor * 15; // 80-95% weekdays
     }
 
     // Future dates have slightly lower projected occupancy
@@ -1399,12 +1413,15 @@ function generateHistoricalOccupancy(): OccupancyData[] {
     const dayOfWeek = currentDate.getDay();
     const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
 
+    // Use deterministic random based on date
+    const randomFactor = seededRandom(date + "historical");
+
     // Last year had better weekend occupancy
     let baseOccupancy: number;
     if (isWeekend) {
-      baseOccupancy = 82 + Math.random() * 10; // 82-92% (better than current)
+      baseOccupancy = 82 + randomFactor * 10; // 82-92% (better than current)
     } else {
-      baseOccupancy = 85 + Math.random() * 10; // 85-95%
+      baseOccupancy = 85 + randomFactor * 10; // 85-95%
     }
 
     const occupancyRate = Math.round(baseOccupancy);

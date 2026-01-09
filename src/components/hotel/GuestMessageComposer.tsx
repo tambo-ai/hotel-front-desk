@@ -5,13 +5,14 @@ import { z } from "zod";
 import { useHotel } from "@/lib/hotel-store";
 import { guests } from "@/data/mock-data";
 import { Mail, Send, X, User, Sparkles } from "lucide-react";
+import { useTamboComponentState } from "@tambo-ai/react";
 
 // Schema for Tambo component registration
 export const GuestMessageComposerPropsSchema = z.object({
-  to: z.string().describe("Recipient email address"),
+  guestId: z.string().optional().describe("Guest ID - component fetches email from guest profile"),
+  to: z.string().optional().describe("Recipient email (fallback if no guestId)"),
   subject: z.string().describe("Email subject line"),
   body: z.string().describe("Email body content"),
-  guestId: z.string().optional().describe("Guest ID for profile context"),
   template: z
     .enum(["welcome", "apology", "confirmation", "thank_you", "custom"])
     .optional()
@@ -26,30 +27,41 @@ export type GuestMessageComposerProps = z.infer<
 >;
 
 export function GuestMessageComposer({
+  guestId,
   to: initialTo,
   subject: initialSubject,
   body: initialBody,
-  guestId,
   template,
   compact = false,
   onSend,
   onClose,
 }: GuestMessageComposerProps) {
   const { clearDraftMessage } = useHotel();
-  const [to, setTo] = useState(initialTo);
-  const [subject, setSubject] = useState(initialSubject);
-  const [body, setBody] = useState(initialBody);
-  const [isSending, setIsSending] = useState(false);
-  const [sent, setSent] = useState(false);
 
+  // Fetch guest data internally using ID (if provided)
   const guest = guestId ? guests.find((g) => g.id === guestId) : null;
 
+  // Email comes from guest profile (not editable)
+  const to = guest?.email || initialTo || "";
+
+  // Use useTamboComponentState with setFromProp (3rd param) to receive AI-generated content
+  // During streaming, state updates as props arrive. After streaming, user edits take precedence.
+  const [subject, setSubject] = useTamboComponentState<string>("subject", "", initialSubject);
+  const [body, setBody] = useTamboComponentState<string>("body", "", initialBody);
+  const [messageStatus, setMessageStatus] = useTamboComponentState<"editing" | "sending" | "sent">(
+    "messageStatus",
+    "editing"
+  );
+
+  // Local UI state (doesn't need AI sync)
+  const isSending = messageStatus === "sending";
+  const sent = messageStatus === "sent";
+
   const handleSend = async () => {
-    setIsSending(true);
+    setMessageStatus("sending");
     // Simulate sending
     await new Promise((resolve) => setTimeout(resolve, 1000));
-    setIsSending(false);
-    setSent(true);
+    setMessageStatus("sent");
     if (onSend) {
       onSend();
     }
@@ -186,17 +198,14 @@ export function GuestMessageComposer({
 
       {/* Form */}
       <div className="p-4 space-y-4">
-        {/* To */}
+        {/* To - read only, comes from guest profile */}
         <div>
           <label className="block text-sm font-medium text-muted-foreground mb-1">
             To
           </label>
-          <input
-            type="email"
-            value={to}
-            onChange={(e) => setTo(e.target.value)}
-            className="w-full px-3 py-2 bg-secondary border border-border rounded-lg text-foreground focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          />
+          <div className="px-3 py-2 bg-muted/50 border border-border rounded-lg text-foreground">
+            {to}
+          </div>
         </div>
 
         {/* Subject */}

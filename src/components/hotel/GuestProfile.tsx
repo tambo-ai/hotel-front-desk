@@ -1,12 +1,13 @@
 "use client";
 
 import { z } from "zod";
-import { GuestSchema, tierColors, tierBadgeStyles } from "@/lib/hotel-types";
+import { tierColors, tierBadgeStyles } from "@/lib/hotel-types";
+import { guests } from "@/data/mock-data";
 import { User, Mail, Phone, Award, Clock } from "lucide-react";
 
-// Schema for Tambo component registration
+// Schema for Tambo component registration - takes ID, fetches data internally
 export const GuestProfilePropsSchema = z.object({
-  guest: GuestSchema.describe("Guest data to display"),
+  guestId: z.string().describe("Guest ID - component fetches data internally"),
   showHistory: z.boolean().optional().describe("Whether to show stay history"),
   compact: z.boolean().optional().describe("Compact mode for chat embedding"),
 });
@@ -14,15 +15,18 @@ export const GuestProfilePropsSchema = z.object({
 export type GuestProfileProps = z.infer<typeof GuestProfilePropsSchema>;
 
 export function GuestProfile({
-  guest,
+  guestId,
   showHistory = false,
   compact = false,
 }: GuestProfileProps) {
-  // Defensive check for undefined guest
+  // Fetch guest data internally using ID
+  const guest = guests.find((g) => g.id === guestId);
+
+  // Not found state
   if (!guest) {
     return (
       <div className="flex flex-col items-center justify-center rounded-lg border border-dashed border-border bg-card/50 p-8 text-center">
-        <p className="text-sm text-muted-foreground">No guest data available</p>
+        <p className="text-sm text-muted-foreground">Guest not found</p>
       </div>
     );
   }

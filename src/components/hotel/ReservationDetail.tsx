@@ -1,8 +1,8 @@
 "use client";
 
 import { z } from "zod";
-import { ReservationSchema, tierColors } from "@/lib/hotel-types";
-import { guests } from "@/data/mock-data";
+import { tierColors } from "@/lib/hotel-types";
+import { guests, reservations } from "@/data/mock-data";
 import { useHotel } from "@/lib/hotel-store";
 import {
   Calendar,
@@ -15,9 +15,9 @@ import {
   AlertCircle,
 } from "lucide-react";
 
-// Schema for Tambo component registration
+// Schema for Tambo component registration - takes ID, fetches data internally
 export const ReservationDetailPropsSchema = z.object({
-  reservation: ReservationSchema.describe("Reservation data to display"),
+  reservationId: z.string().describe("Reservation ID - component fetches data internally"),
   showActions: z.boolean().optional().describe("Show action buttons"),
   compact: z.boolean().optional().describe("Compact mode for chat embedding"),
 });
@@ -54,7 +54,7 @@ const statusStyles = {
 };
 
 export function ReservationDetail({
-  reservation,
+  reservationId,
   showActions = false,
   compact = false,
 }: ReservationDetailProps) {
@@ -62,12 +62,16 @@ export function ReservationDetail({
   const state = hotelContext?.state;
   const startCheckIn = hotelContext?.startCheckIn;
 
-  // Defensive check for undefined reservation
+  // Fetch reservation data internally using ID
+  const reservation = state?.reservations.find((r) => r.id === reservationId)
+    || reservations.find((r) => r.id === reservationId);
+
+  // Not found state
   if (!reservation) {
     return (
       <div className="flex flex-col items-center justify-center rounded-lg border border-dashed border-border bg-card/50 p-8 text-center">
         <p className="text-sm text-muted-foreground">
-          No reservation data available
+          Reservation not found
         </p>
       </div>
     );

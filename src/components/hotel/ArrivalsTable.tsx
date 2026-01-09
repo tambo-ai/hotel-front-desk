@@ -1,17 +1,13 @@
 "use client";
 
 import { z } from "zod";
-import { ReservationSchema, tierColors } from "@/lib/hotel-types";
+import { tierColors } from "@/lib/hotel-types";
 import { useHotel } from "@/lib/hotel-store";
-import { guests } from "@/data/mock-data";
+import { guests, reservations as allReservations } from "@/data/mock-data";
 import { Clock, Award, BedDouble, MessageSquare, User } from "lucide-react";
 
-// Schema for Tambo component registration
+// Schema for Tambo component registration - fetches arrivals internally
 export const ArrivalsTablePropsSchema = z.object({
-  reservations: z
-    .array(ReservationSchema)
-    .optional()
-    .describe("Reservations to display (defaults to today's arrivals)"),
   highlightedIds: z
     .array(z.string())
     .optional()
@@ -26,16 +22,18 @@ export const ArrivalsTablePropsSchema = z.object({
 export type ArrivalsTableProps = z.infer<typeof ArrivalsTablePropsSchema>;
 
 export function ArrivalsTable({
-  reservations: providedReservations,
   highlightedIds,
   showVipOnly = false,
   compact = false,
 }: ArrivalsTableProps) {
-  const { state, getTodaysArrivals, selectReservation, startCheckIn } =
-    useHotel();
+  const { state, selectReservation, startCheckIn } = useHotel();
 
-  // Get arrivals from props or state
-  let arrivals = providedReservations || getTodaysArrivals();
+  // Fetch today's arrivals internally
+  const today = new Date().toISOString().split("T")[0];
+  const reservations = state?.reservations || allReservations;
+  let arrivals = reservations.filter(
+    (r) => r.checkInDate === today && (r.status === "confirmed" || r.status === "checked_in")
+  );
 
   // Filter for VIP only if requested
   if (showVipOnly) {
