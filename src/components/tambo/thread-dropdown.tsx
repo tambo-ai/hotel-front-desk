@@ -147,6 +147,41 @@ export const ThreadDropdown = React.forwardRef<
 ThreadDropdown.displayName = "ThreadDropdown";
 
 /**
+ * Format a date string into a readable format
+ */
+function formatThreadDate(dateString: string): string {
+  const date = new Date(dateString);
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  const diffMins = Math.floor(diffMs / 60000);
+  const diffHours = Math.floor(diffMs / 3600000);
+  const diffDays = Math.floor(diffMs / 86400000);
+
+  if (diffMins < 1) return "Just now";
+  if (diffMins < 60) return `${diffMins}m ago`;
+  if (diffHours < 24) return `${diffHours}h ago`;
+  if (diffDays < 7) return `${diffDays}d ago`;
+
+  return date.toLocaleDateString(undefined, {
+    month: "short",
+    day: "numeric"
+  });
+}
+
+/**
+ * Get a display name for a thread
+ */
+function getThreadDisplayName(thread: { id: string; name?: string; createdAt?: string }): string {
+  if (thread.name) {
+    return thread.name;
+  }
+  if (thread.createdAt) {
+    return `Chat from ${formatThreadDate(thread.createdAt)}`;
+  }
+  return `Thread ${thread.id.substring(0, 8)}`;
+}
+
+/**
  * Internal component to render thread list content based on loading/error/empty states
  */
 function ThreadListContent({
@@ -157,7 +192,7 @@ function ThreadListContent({
 }: {
   isLoading: boolean;
   error: Error | null;
-  threads: { items: { id: string }[] } | null | undefined;
+  threads: { items: { id: string; name?: string; createdAt?: string }[] } | null | undefined;
   onSwitchThread: (threadId: string) => void;
 }) {
   if (isLoading) {
@@ -202,7 +237,7 @@ function ThreadListContent({
           }}
         >
           <span className="truncate max-w-[180px]">
-            {`Thread ${thread.id.substring(0, 8)}`}
+            {getThreadDisplayName(thread)}
           </span>
         </DropdownMenu.Item>
       ))}
