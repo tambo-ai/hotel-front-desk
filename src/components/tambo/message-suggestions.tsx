@@ -315,7 +315,7 @@ const MessageSuggestionsList = React.forwardRef<
     <div
       ref={ref}
       className={cn(
-        "flex flex-wrap gap-2 pb-2 bg-transparent min-h-[2.5rem]",
+        "flex gap-2 pb-2 bg-transparent overflow-x-auto scrollbar-none",
         isGenerating ? "opacity-70" : "",
         className,
       )}
@@ -335,7 +335,7 @@ const MessageSuggestionsList = React.forwardRef<
             >
               <button
                 className={cn(
-                  "py-2 px-3 rounded-xl text-xs transition-all duration-200",
+                  "py-2 px-3 rounded-xl text-xs transition-all duration-200 shrink-0 whitespace-nowrap",
                   "border",
                   isGenerating
                     ? "bg-muted/50 text-muted-foreground border-border"
@@ -358,7 +358,7 @@ const MessageSuggestionsList = React.forwardRef<
           placeholders.map((_, index) => (
             <div
               key={`placeholder-${index}`}
-              className="py-2 px-3 rounded-xl text-xs border border-border bg-muted/30 text-transparent animate-pulse"
+              className="py-2 px-3 rounded-xl text-xs border border-border bg-muted/30 text-transparent animate-pulse shrink-0"
               data-placeholder-index={index}
             >
               <span className="invisible">Placeholder</span>
