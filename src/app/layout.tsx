@@ -1,5 +1,9 @@
 import { Inter, JetBrains_Mono } from "next/font/google";
 import { ThemeProvider } from "@/components/theme-provider";
+import {
+  NotificationProvider,
+  NotificationContainer,
+} from "@/components/notifications";
 import "./globals.css";
 
 const inter = Inter({
@@ -30,7 +34,10 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          {children}
+          <NotificationProvider>
+            {children}
+            <NotificationContainer />
+          </NotificationProvider>
         </ThemeProvider>
       </body>
     </html>

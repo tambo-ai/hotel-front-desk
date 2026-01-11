@@ -566,3 +566,30 @@ export const GuestSummarySchema = z.object({
   loyaltyTier: LoyaltyTierEnum.describe("Loyalty tier"),
 });
 export type GuestSummary = z.infer<typeof GuestSummarySchema>;
+
+// ============================================================================
+// Unsupported Feature Types
+// ============================================================================
+
+export const UnsupportedFeatureEnum = z.enum([
+  "checkout",
+  "create_reservation",
+  "extend_stay",
+  "room_change",
+  "payment",
+  "add_charge",
+]);
+export type UnsupportedFeature = z.infer<typeof UnsupportedFeatureEnum>;
+
+export const HandleUnsupportedFeatureArgsSchema = z.object({
+  feature: UnsupportedFeatureEnum.describe("The unsupported feature that was requested"),
+});
+export type HandleUnsupportedFeatureArgs = z.infer<typeof HandleUnsupportedFeatureArgsSchema>;
+
+export const HandleUnsupportedFeatureResultSchema = z.object({
+  message: z.string().describe("Friendly message explaining demo limitation"),
+  canDo: z.array(z.string()).describe("List of related actions that ARE supported in the demo"),
+  tamboDocsUrl: z.string().describe("Link to Tambo documentation"),
+  demoSourceUrl: z.string().describe("Link to demo source code"),
+});
+export type HandleUnsupportedFeatureResult = z.infer<typeof HandleUnsupportedFeatureResultSchema>;

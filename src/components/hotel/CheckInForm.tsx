@@ -236,12 +236,12 @@ export function CheckInForm({ reservationId }: CheckInFormProps) {
         </div>
       </div>
 
-      {/* Footer - Full width button */}
+      {/* Footer - Full width button with pulse animation when room selected */}
       <div className="p-3 pt-0">
         <button
           onClick={handleCompleteCheckIn}
           disabled={!displayRoom}
-          className="w-full flex items-center justify-center gap-2 rounded-md bg-success px-4 py-3 text-sm font-medium text-white transition-all hover:opacity-90 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
+          className={`w-full flex items-center justify-center gap-2 rounded-md bg-success px-4 py-3 text-sm font-medium text-white transition-all hover:opacity-90 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 ${displayRoom ? "animate-pulse ring-2 ring-success/50 ring-offset-2 ring-offset-card" : ""}`}
         >
           <CheckCircle className="h-4 w-4" />
           Complete Check-in

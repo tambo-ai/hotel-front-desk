@@ -1,7 +1,7 @@
 "use client";
 
 import { z } from "zod";
-import { Moon, Sun, Monitor } from "lucide-react";
+import { Moon, Sun, Monitor, ExternalLink } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
 
@@ -72,6 +72,38 @@ export function SettingsPage({}: SettingsPageProps) {
             {option.label}
           </button>
         ))}
+      </div>
+
+      {/* Divider */}
+      <div className="border-t border-border my-4"></div>
+
+      {/* About this Demo section */}
+      <div className="space-y-2">
+        <h3 className="text-sm font-medium text-foreground">About this Demo</h3>
+        <p className="text-sm text-muted-foreground">
+          This hotel front desk demo showcases Tambo AI&apos;s generative UI
+          capabilities.
+        </p>
+        <div className="flex flex-wrap gap-2">
+          <a
+            href="https://github.com/tambo-ai/tambo"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1.5 rounded-md bg-secondary px-3 py-1.5 text-xs font-medium text-foreground hover:bg-secondary/80 transition-colors"
+          >
+            <ExternalLink className="h-3.5 w-3.5" />
+            Tambo Framework
+          </a>
+          <a
+            href="https://github.com/tambo-ai/hotel-front-desk"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1.5 rounded-md bg-secondary px-3 py-1.5 text-xs font-medium text-foreground hover:bg-secondary/80 transition-colors"
+          >
+            <ExternalLink className="h-3.5 w-3.5" />
+            View Source Code
+          </a>
+        </div>
       </div>
     </div>
   );
