@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import { z } from "zod";
 import { useHotel } from "@/lib/hotel-store";
 import { rooms as allRooms, guests } from "@/data/mock-data";
@@ -17,6 +16,7 @@ import {
   Bug,
   HelpCircle,
 } from "lucide-react";
+import { useTamboComponentState } from "@tambo-ai/react";
 
 // Issue category definitions
 export const RoomIssueCategoryEnum = z.enum([
@@ -88,33 +88,51 @@ export function RoomIssueForm({
   onClose,
 }: RoomIssueFormProps) {
   const { state } = useHotel();
-  const [category, setCategory] = useState<RoomIssueCategory | "">(
+
+  // Use useTamboComponentState to sync form state back to AI
+  const [category, setCategory] = useTamboComponentState<RoomIssueCategory | "">(
+    "category",
+    "",
     initialCategory || ""
   );
-  const [priority, setPriority] = useState<RoomIssuePriority>(
+  const [priority, setPriority] = useTamboComponentState<RoomIssuePriority>(
+    "priority",
+    "medium",
     initialPriority || "medium"
   );
-  const [description, setDescription] = useState(initialDescription || "");
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitted, setSubmitted] = useState(false);
-  const [ticketId, setTicketId] = useState<string | null>(null);
+  const [description, setDescription] = useTamboComponentState<string>(
+    "description",
+    "",
+    initialDescription || ""
+  );
+  const [submissionStatus, setSubmissionStatus] = useTamboComponentState<"editing" | "submitting" | "submitted">(
+    "submissionStatus",
+    "editing"
+  );
+  const [ticketId, setTicketId] = useTamboComponentState<string | null>(
+    "ticketId",
+    null
+  );
+
+  // Derive local UI state from synced state
+  const isSubmitting = submissionStatus === "submitting";
+  const submitted = submissionStatus === "submitted";
 
   const room = state.rooms.find((r) => r.number === roomNumber) ||
     allRooms.find((r) => r.number === roomNumber);
   const guest = guestId ? guests.find((g) => g.id === guestId) : null;
 
   const handleSubmit = async () => {
-    if (!category || !description.trim()) return;
+    if (!category || !description?.trim()) return;
 
-    setIsSubmitting(true);
+    setSubmissionStatus("submitting");
     // Simulate submission
     await new Promise((resolve) => setTimeout(resolve, 1000));
 
     // Generate ticket ID
     const newTicketId = `ISS-${Date.now().toString(36).toUpperCase()}`;
     setTicketId(newTicketId);
-    setIsSubmitting(false);
-    setSubmitted(true);
+    setSubmissionStatus("submitted");
 
     if (onSubmit) {
       onSubmit();
@@ -214,7 +232,7 @@ export function RoomIssueForm({
         <div className="mt-3 flex gap-2">
           <button
             onClick={handleSubmit}
-            disabled={isSubmitting || !category || !description.trim()}
+            disabled={isSubmitting || !category || !description?.trim()}
             className="flex-1 px-3 py-1.5 bg-amber-600 hover:bg-amber-700 disabled:bg-muted disabled:cursor-not-allowed text-foreground text-sm rounded transition-colors flex items-center justify-center gap-1"
           >
             {isSubmitting ? (
@@ -350,7 +368,7 @@ export function RoomIssueForm({
         )}
         <button
           onClick={handleSubmit}
-          disabled={isSubmitting || !category || !description.trim()}
+          disabled={isSubmitting || !category || !description?.trim()}
           className="px-6 py-2 bg-amber-600 hover:bg-amber-700 disabled:bg-muted disabled:cursor-not-allowed text-foreground rounded-lg transition-colors flex items-center gap-2"
         >
           {isSubmitting ? (

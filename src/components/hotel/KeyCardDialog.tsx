@@ -3,6 +3,7 @@
 import { z } from "zod";
 import { useHotel } from "@/lib/hotel-store";
 import { CreditCard, X, Printer } from "lucide-react";
+import { useTamboComponentState } from "@tambo-ai/react";
 
 // Schema for Tambo component registration
 export const KeyCardDialogPropsSchema = z.object({
@@ -27,12 +28,27 @@ export function KeyCardDialog({
   const hotelContext = useHotel();
   const clearKeyGenerationData = hotelContext?.clearKeyGenerationData;
 
+  // Sync key count and print status to AI context
+  // Note: keyCount defaults to 2 in the destructuring, so we're safe to use it directly
+  const effectiveKeyCount = keyCount;
+  const [activeKeyCount, setActiveKeyCount] = useTamboComponentState<number>(
+    "keyCount",
+    effectiveKeyCount,
+    effectiveKeyCount
+  );
+  const [printStatus, setPrintStatus] = useTamboComponentState<"pending" | "printing" | "printed">(
+    "printStatus",
+    "pending"
+  );
+
   const handlePrint = () => {
+    setPrintStatus("printing");
     if (onPrint) {
       onPrint();
     }
     // Simulate key generation delay
     setTimeout(() => {
+      setPrintStatus("printed");
       if (clearKeyGenerationData) {
         clearKeyGenerationData();
       }
@@ -87,13 +103,13 @@ export function KeyCardDialog({
             </div>
             <div className="flex justify-between text-sm">
               <span className="text-muted-foreground">Number of Keys</span>
-              <span className="text-foreground font-medium">{keyCount}</span>
+              <span className="text-foreground font-medium">{activeKeyCount}</span>
             </div>
           </div>
 
           {/* Key Card Preview */}
           <div className="flex justify-center gap-3">
-            {Array.from({ length: keyCount }).map((_, i) => (
+            {Array.from({ length: activeKeyCount ?? keyCount }).map((_, i) => (
               <div
                 key={i}
                 className="w-24 h-16 bg-gradient-to-br from-blue-600 to-blue-800 rounded-lg shadow-lg flex items-center justify-center relative overflow-hidden"
@@ -123,7 +139,7 @@ export function KeyCardDialog({
             className="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-foreground rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
           >
             <Printer className="w-4 h-4" />
-            Print {keyCount} Key{keyCount !== 1 ? "s" : ""}
+            Print {activeKeyCount} Key{activeKeyCount !== 1 ? "s" : ""}
           </button>
         </div>
       </div>

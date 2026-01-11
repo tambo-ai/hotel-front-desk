@@ -5,6 +5,8 @@ import { tierColors } from "@/lib/hotel-types";
 import { useHotel } from "@/lib/hotel-store";
 import { guests } from "@/data/mock-data";
 import { LogOut, BedDouble, DollarSign, User, AlertCircle } from "lucide-react";
+import { useNotification } from "@/components/notifications";
+import { useTamboComponentState } from "@tambo-ai/react";
 
 // Schema for Tambo component registration - fetches departures internally
 export const DeparturesTablePropsSchema = z.object({
@@ -29,6 +31,18 @@ export function DeparturesTable({
     selectReservation,
     getBillingForReservation,
   } = useHotel();
+  const { notify } = useNotification();
+
+  // Sync checkout attempt status to AI context
+  const [checkoutStatus, setCheckoutStatus] = useTamboComponentState<{
+    status: "idle" | "attempted";
+    reservationId: string | null;
+    guestName: string | null;
+    roomNumber: number | null;
+  }>(
+    "checkoutStatus",
+    { status: "idle", reservationId: null, guestName: null, roomNumber: null }
+  );
 
   // Fetch today's departures internally
   let departures = getTodaysDepartures();
@@ -207,7 +221,27 @@ export function DeparturesTable({
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
-                        selectReservation(res.id);
+                        // Sync checkout attempt to AI context
+                        setCheckoutStatus({
+                          status: "attempted",
+                          reservationId: res.id,
+                          guestName: guest ? `${guest.firstName} ${guest.lastName}` : null,
+                          roomNumber: res.roomNumber ?? null,
+                        });
+                        notify({
+                          type: "warning",
+                          title: "Demo Limitation",
+                          message:
+                            "Checkout processing isn't included in this demo. In production, this would complete the checkout and free the room.",
+                          action: {
+                            label: "Learn More",
+                            onClick: () =>
+                              window.open(
+                                "https://github.com/tambo-ai/tambo",
+                                "_blank",
+                              ),
+                          },
+                        });
                       }}
                       className="ml-auto flex items-center gap-1.5 rounded-md bg-info px-3 py-1.5 text-xs font-medium text-white transition-all hover:opacity-90 focus-ring"
                     >

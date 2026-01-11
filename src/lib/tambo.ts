@@ -77,6 +77,10 @@ import {
   CheckInForm,
   CheckInFormPropsSchema,
 } from "@/components/hotel/CheckInForm";
+import {
+  UnsupportedFeatureCard,
+  UnsupportedFeatureCardPropsSchema,
+} from "@/components/hotel/UnsupportedFeatureCard";
 
 // Hotel Tools (data retrieval only)
 import {
@@ -110,7 +114,12 @@ import {
   OccupancyDataSchema,
   ReservationSummarySchema,
   RoomSummarySchema,
+  HandleUnsupportedFeatureArgsSchema,
+  HandleUnsupportedFeatureResultSchema,
 } from "@/lib/hotel-types";
+
+// Unsupported Features Tool
+import { handleUnsupportedFeature } from "@/services/unsupported-features";
 
 /**
  * tools
@@ -341,6 +350,20 @@ export const tools: TamboTool[] = [
         }),
       ),
   },
+
+  // ============================================================================
+  // Unsupported Features Tool
+  // ============================================================================
+  {
+    name: "handleUnsupportedFeature",
+    description:
+      "Call this tool when the user asks to perform an action that is not supported in this demo. Examples: checkout processing, create reservation, extend stay, room changes, payment processing, adding charges. Returns a helpful message explaining this is a demo and links to documentation.",
+    tool: handleUnsupportedFeature,
+    toolSchema: z
+      .function()
+      .args(HandleUnsupportedFeatureArgsSchema)
+      .returns(HandleUnsupportedFeatureResultSchema),
+  },
 ];
 
 /**
@@ -490,7 +513,7 @@ export const components: TamboComponent[] = [
   {
     name: "CheckInForm",
     description:
-      "Interactive check-in form. Pass the reservationId from search results - component fetches data internally. User can select room and complete check-in. Component syncs selectedRoom and checkInStatus back to AI context for follow-up actions.",
+      "Interactive check-in form. Pass the reservationId from search results - component fetches data internally. User can select room and complete check-in. **IMPORTANT**: After rendering this component, tell the user to click the 'Check In' button to complete the process. Component syncs selectedRoom and checkInStatus back to AI context for follow-up actions.",
     component: CheckInForm,
     propsSchema: CheckInFormPropsSchema,
   },
@@ -504,5 +527,16 @@ export const components: TamboComponent[] = [
       "Dedicated form for reporting room issues with category selection (plumbing, electrical, HVAC, noise, cleanliness, pest, maintenance, other), priority level (low, medium, high, urgent), and description field. Use to display a form for guests or staff to report maintenance issues for a specific room.",
     component: RoomIssueForm,
     propsSchema: RoomIssueFormPropsSchema,
+  },
+
+  // ============================================================================
+  // Unsupported Feature Components
+  // ============================================================================
+  {
+    name: "UnsupportedFeatureCard",
+    description:
+      "Render this component instead of calling handleUnsupportedFeature tool when the user asks to perform an unsupported action. Feature types: checkout, create_reservation, extend_stay, room_change, payment, add_charge. Shows a styled card with demo limitation message, list of what user CAN do, and links to Tambo docs and source code.",
+    component: UnsupportedFeatureCard,
+    propsSchema: UnsupportedFeatureCardPropsSchema,
   },
 ];
