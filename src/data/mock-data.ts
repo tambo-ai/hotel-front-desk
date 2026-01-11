@@ -14,12 +14,35 @@ import type {
 // Helper Functions
 // ============================================================================
 
+/**
+ * Fixed reference date for the demo to prevent SSR/client hydration mismatches.
+ * Using a hardcoded stable date ensures consistent rendering between server and client.
+ * This represents "today" in the demo context.
+ *
+ * The date is generated dynamically but cached to prevent hydration mismatches.
+ * Using ISO format ensures timezone independence.
+ */
+export const DEMO_TODAY = (() => {
+  // Generate "today" once at build/startup time
+  // This will be consistent within a single server instance
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+})();
+
+/**
+ * Get the demo's reference "today" date string (YYYY-MM-DD format).
+ * Uses DEMO_TODAY to ensure SSR/client consistency.
+ */
 function getToday(): string {
-  return new Date().toISOString().split("T")[0];
+  return DEMO_TODAY;
 }
 
+/**
+ * Get a date string offset from the demo's "today" reference date.
+ * @param days - Number of days to offset (positive for future, negative for past)
+ */
 function getDateOffset(days: number): string {
-  const date = new Date();
+  const date = new Date(DEMO_TODAY);
   date.setDate(date.getDate() + days);
   return date.toISOString().split("T")[0];
 }

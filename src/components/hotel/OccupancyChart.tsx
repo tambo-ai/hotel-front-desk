@@ -2,7 +2,7 @@
 
 import { z } from "zod";
 import { OccupancyDataSchema } from "@/lib/hotel-types";
-import { occupancyData, historicalOccupancy } from "@/data/mock-data";
+import { occupancyData, historicalOccupancy, DEMO_TODAY } from "@/data/mock-data";
 import {
   LineChart,
   Line,
@@ -84,17 +84,17 @@ export function OccupancyChart({
   // Get data from props or default
   let chartData = providedData || occupancyData;
 
-  // Filter by date range
-  const today = new Date();
+  // Filter by date range using the stable demo date
+  const today = new Date(DEMO_TODAY);
   if (dateRange === "week") {
-    const weekAgo = new Date(today);
+    const weekAgo = new Date(DEMO_TODAY);
     weekAgo.setDate(weekAgo.getDate() - 7);
     chartData = chartData.filter((d) => {
       const date = new Date(d.date);
       return date >= weekAgo && date <= today;
     });
   } else if (dateRange === "month") {
-    const monthAgo = new Date(today);
+    const monthAgo = new Date(DEMO_TODAY);
     monthAgo.setDate(monthAgo.getDate() - 30);
     chartData = chartData.filter((d) => {
       const date = new Date(d.date);

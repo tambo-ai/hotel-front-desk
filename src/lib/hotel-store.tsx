@@ -28,6 +28,7 @@ import {
   billingItems as initialBillingItems,
   housekeepingTasks as initialHousekeepingTasks,
   roomRates as initialRoomRates,
+  DEMO_TODAY,
 } from "@/data/mock-data";
 import type { Reservation, HousekeepingTask, RoomRate } from "./hotel-types";
 
@@ -703,18 +704,16 @@ export function HotelProvider({ children }: { children: ReactNode }) {
   );
 
   const getTodaysArrivals = useCallback(() => {
-    const today = new Date().toISOString().split("T")[0];
     return state.reservations.filter(
       (r) =>
-        r.checkInDate === today &&
+        r.checkInDate === DEMO_TODAY &&
         (r.status === "confirmed" || r.status === "checked_in"),
     );
   }, [state.reservations]);
 
   const getTodaysDepartures = useCallback(() => {
-    const today = new Date().toISOString().split("T")[0];
     return state.reservations.filter(
-      (r) => r.checkOutDate === today && r.status === "checked_in",
+      (r) => r.checkOutDate === DEMO_TODAY && r.status === "checked_in",
     );
   }, [state.reservations]);
 

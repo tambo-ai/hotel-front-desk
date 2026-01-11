@@ -3,7 +3,7 @@
 import { z } from "zod";
 import { tierColors } from "@/lib/hotel-types";
 import { useHotel } from "@/lib/hotel-store";
-import { guests, reservations as allReservations } from "@/data/mock-data";
+import { guests, reservations as allReservations, DEMO_TODAY } from "@/data/mock-data";
 import { Clock, Award, BedDouble, MessageSquare, User } from "lucide-react";
 
 // Schema for Tambo component registration - fetches arrivals internally
@@ -28,8 +28,8 @@ export function ArrivalsTable({
 }: ArrivalsTableProps) {
   const { state, selectReservation, startCheckIn } = useHotel();
 
-  // Fetch today's arrivals internally
-  const today = new Date().toISOString().split("T")[0];
+  // Fetch today's arrivals internally using the stable demo date
+  const today = DEMO_TODAY;
   const reservations = state?.reservations || allReservations;
   let arrivals = reservations.filter(
     (r) => r.checkInDate === today && (r.status === "confirmed" || r.status === "checked_in")

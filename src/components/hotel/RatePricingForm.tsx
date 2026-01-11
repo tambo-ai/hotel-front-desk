@@ -2,7 +2,7 @@
 
 import { z } from "zod";
 import { useHotel } from "@/lib/hotel-store";
-import { roomRates } from "@/data/mock-data";
+import { roomRates, DEMO_TODAY } from "@/data/mock-data";
 import type { RoomType } from "@/lib/hotel-types";
 import { DollarSign, Calendar, TrendingUp, TrendingDown } from "lucide-react";
 
@@ -36,8 +36,8 @@ export function RatePricingForm({
     rates = rates.filter((r) => r.date === date);
   }
 
-  // Get only future dates (next 7 days)
-  const today = new Date().toISOString().split("T")[0];
+  // Get only future dates (next 7 days) using the stable demo date
+  const today = DEMO_TODAY;
   rates = rates.filter((r) => r.date >= today).slice(0, 7);
 
   // Group by date for display

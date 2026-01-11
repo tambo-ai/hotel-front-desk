@@ -15,7 +15,7 @@ import { BillingStatement } from "./BillingStatement";
 import { GuestProfile } from "./GuestProfile";
 import { GuestMessageComposer } from "./GuestMessageComposer";
 import { SettingsPage } from "./SettingsPage";
-import { guests, reservations } from "@/data/mock-data";
+import { guests, reservations, DEMO_TODAY } from "@/data/mock-data";
 import {
   BedDouble,
   Users,
@@ -50,12 +50,12 @@ export function Dashboard() {
   ).length;
   const todaysArrivals = reservations.filter(
     (r) =>
-      r.checkInDate === new Date().toISOString().split("T")[0] &&
+      r.checkInDate === DEMO_TODAY &&
       r.status === "confirmed",
   ).length;
   const todaysDepartures = reservations.filter(
     (r) =>
-      r.checkOutDate === new Date().toISOString().split("T")[0] &&
+      r.checkOutDate === DEMO_TODAY &&
       r.status === "checked_in",
   ).length;
 

@@ -79,8 +79,8 @@ export function NavigationTabs({ onSearchClick, isChatOpen }: NavigationTabsProp
   const { state, navigateTo } = useHotel();
 
   return (
-    <nav className="sticky top-0 z-40 border-b border-border bg-background/95 backdrop-blur-md supports-[backdrop-filter]:bg-background/60">
-      <div className="mx-auto flex h-12 max-w-[1920px] items-center px-4">
+    <nav className="sticky top-0 z-40 border-b border-border bg-background/95 backdrop-blur-md supports-[backdrop-filter]:bg-background/60 overflow-x-auto">
+      <div className="mx-auto flex h-12 max-w-[1920px] items-center px-4 min-w-max">
         {/* Logo */}
         <div className="flex items-center gap-2.5 border-r border-border pr-6 mr-6">
           <div className="flex h-7 w-7 items-center justify-center rounded-md bg-accent">
