@@ -11,6 +11,9 @@
     "init": "npx tambo init",
     "format": "prettier --write ."
   },
+  "overrides": {
+    "postcss": "^8.5.12"
+  },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.27.1",
     "@radix-ui/react-dropdown-menu": "^2.1.16",
@@ -18,19 +21,19 @@
     "@tambo-ai/react": "^0.68.0",
     "@tambo-ai/typescript-sdk": "^0.80.0",
     "class-variance-authority": "^0.7.1",
-    "dompurify": "^3.3.1",
+    "dompurify": "^3.4.1",
     "framer-motion": "^12.23.26",
     "highlight.js": "^11.11.1",
     "json-stringify-pretty-compact": "^4.0.0",
     "lucide-react": "^0.561.0",
-    "next": "^16.1.6",
+    "next": "^16.2.3",
     "next-themes": "^0.4.6",
     "radix-ui": "^1.4.3",
     "react": "^19.2.3",
     "react-dom": "^19.2.3",
     "react-markdown": "^10.1.0",
     "recharts": "^3.6.0",
-    "streamdown": "^1.6.10"
+    "streamdown": "~2.4.0"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.1.18",
@@ -41,8 +44,8 @@
     "autoprefixer": "^10.4.23",
     "clsx": "^2.1.1",
     "eslint": "^9",
-    "eslint-config-next": "^16.1.6",
-    "postcss": "^8.5.6",
+    "eslint-config-next": "^16.2.3",
+    "postcss": "^8.5.12",
     "prettier": "^3.7.4",
     "tailwind-merge": "^3.4.0",
     "tailwindcss": "^4",
